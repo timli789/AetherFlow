@@ -1,8 +1,8 @@
-const CACHE_NAME = 'aetherflow-lite-v9';
+const CACHE_NAME = 'aetherflow-lite-v10';
 const ASSETS = [
-  'lite.html',
+  'index.html',
   'style.css',
-  'lite.js',
+  'app.js',
   'manifest.json',
   'icon-192.png',
   'icon-512.png',
@@ -53,7 +53,7 @@ self.addEventListener('fetch', (e) => {
     }).catch(() => {
       // Offline fallback
       if (e.request.mode === 'navigate') {
-        return caches.match('lite.html');
+        return caches.match('index.html');
       }
     })
   );

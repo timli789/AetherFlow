@@ -2,7 +2,7 @@
   "name": "AetherFlow Lite",
   "short_name": "AetherFlow",
   "description": "Minimalist mental free association practice.",
-  "start_url": "lite.html",
+  "start_url": "index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#080913",

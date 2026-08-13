@@ -2,17 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A beautiful and immersive free association word practice application. Improve your cognitive flexibility, creativity, and writing speed.">
-  <title>AetherFlow - Free Association Practice</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="description" content="A lightweight and clean version of the free association word practice application. Focus purely on the flow of your thoughts.">
+  <!-- PWA & Apple Integration -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AetherFlow">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <title>AetherFlow Lite - Free Association Practice</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- App Stylesheet -->
+  <!-- App Stylesheet (Reuses main styling) -->
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Custom modifications for Lite view layout */
+    .lite-setup-container {
+      max-width: 480px;
+      margin: 40px auto;
+    }
+  </style>
 </head>
 <body>
   <!-- Ambient background glow elements -->
@@ -25,138 +38,49 @@
     <header class="app-header">
       <div class="brand">
         <div class="brand-logo">
-          <i data-lucide="brain-circuit" class="logo-icon"></i>
+          <i data-lucide="brain" class="logo-icon"></i>
         </div>
         <div class="brand-text">
-          <h1>AetherFlow</h1>
-          <p>Free Association Studio</p>
+          <h1>AetherFlow Lite</h1>
+          <p>Stream of Consciousness</p>
         </div>
-      </div>
-      <div class="header-actions">
-        <button id="theme-toggle-btn" class="icon-button" title="Toggle Theme" aria-label="Toggle Theme">
-          <i data-lucide="sun"></i>
-        </button>
       </div>
     </header>
 
     <!-- VIEWS CONTAINER -->
     <main class="views-container">
       
-      <!-- 1. DASHBOARD VIEW -->
+      <!-- 1. SETUP VIEW (DASHBOARD) -->
       <section id="dashboard-view" class="app-view active">
-        <div class="dashboard-grid">
-          
-          <!-- Quick Stats Panel -->
-          <div class="stats-overview glass-panel">
-            <h2 class="section-title"><i data-lucide="sparkles"></i> Insights Dashboard</h2>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <span class="stat-value" id="stat-total-sessions">0</span>
-                <span class="stat-label">Sessions Completed</span>
-                <div class="stat-icon-wrapper"><i data-lucide="check-circle-2"></i></div>
+        <div class="lite-setup-container glass-panel">
+          <h2 class="section-title" style="justify-content: center; margin-bottom: 24px;">
+            <i data-lucide="sliders"></i> 
+            <span>Select Practice Time</span>
+          </h2>
+          <form id="config-form" class="config-form">
+            <div class="form-group">
+              <div class="duration-selector" style="grid-template-columns: repeat(5, 1fr);">
+                <button type="button" class="duration-btn" data-value="10">10s</button>
+                <button type="button" class="duration-btn active" data-value="15">15s</button>
+                <button type="button" class="duration-btn" data-value="20">20s</button>
+                <button type="button" class="duration-btn" data-value="25">25s</button>
+                <button type="button" class="duration-btn" data-value="30">30s</button>
               </div>
-              <div class="stat-card">
-                <span class="stat-value" id="stat-total-words">0</span>
-                <span class="stat-label">Total Associations</span>
-                <div class="stat-icon-wrapper"><i data-lucide="message-square"></i></div>
-              </div>
-              <div class="stat-card">
-                <span class="stat-value" id="stat-avg-wpm">0</span>
-                <span class="stat-label">Average WPM</span>
-                <div class="stat-icon-wrapper"><i data-lucide="gauge"></i></div>
-              </div>
-              <div class="stat-card">
-                <span class="stat-value" id="stat-streak">0</span>
-                <span class="stat-label">Daily Streak</span>
-                <div class="stat-icon-wrapper"><i data-lucide="flame"></i></div>
-              </div>
+              <input type="hidden" id="duration-input" value="15">
             </div>
-          </div>
 
-          <!-- Configuration Panel -->
-          <div class="practice-config glass-panel">
-            <h2 class="section-title"><i data-lucide="settings"></i> Configure Practice</h2>
-            <form id="config-form" class="config-form">
-              <div class="form-group">
-                <label for="duration-select">Session Duration</label>
-                <div class="duration-selector">
-                  <button type="button" class="duration-btn" data-value="10">10s</button>
-                  <button type="button" class="duration-btn" data-value="15">15s</button>
-                  <button type="button" class="duration-btn" data-value="20">20s</button>
-                  <button type="button" class="duration-btn" data-value="25">25s</button>
-                  <button type="button" class="duration-btn active" data-value="30">30s</button>
-                  <button type="button" class="duration-btn" data-value="45">45s</button>
-                  <button type="button" class="duration-btn" data-value="infinite">
-                    <i data-lucide="infinity" style="width:16px; height:16px;"></i>
-                  </button>
-                </div>
-                <input type="hidden" id="duration-input" value="30">
-              </div>
-
-              <div class="form-group">
-                <label>Prompt Category</label>
-                <div class="category-grid">
-                  <label class="category-card">
-                    <input type="radio" name="category" value="all" checked>
-                    <span class="category-content">
-                      <i data-lucide="layers"></i>
-                      <span>All Nouns</span>
-                    </span>
-                  </label>
-                  <label class="category-card">
-                    <input type="radio" name="category" value="concrete">
-                    <span class="category-content">
-                      <i data-lucide="box"></i>
-                      <span>Concrete</span>
-                    </span>
-                  </label>
-                  <label class="category-card">
-                    <input type="radio" name="category" value="abstract">
-                    <span class="category-content">
-                      <i data-lucide="feather"></i>
-                      <span>Abstract</span>
-                    </span>
-                  </label>
-                  <label class="category-card">
-                    <input type="radio" name="category" value="nature">
-                    <span class="category-content">
-                      <i data-lucide="compass"></i>
-                      <span>Nature</span>
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              <button type="submit" class="primary-btn start-btn">
-                <span>Begin Session</span>
-                <i data-lucide="play-circle"></i>
-              </button>
-            </form>
-          </div>
-
-          <!-- History Logs Panel -->
-          <div class="history-panel glass-panel">
-            <div class="panel-header">
-              <h2 class="section-title"><i data-lucide="history"></i> Practice History</h2>
-              <button id="clear-history-btn" class="text-btn danger-hover hidden">Clear All</button>
-            </div>
-            <div class="history-list-wrapper">
-              <div id="history-empty" class="empty-state">
-                <i data-lucide="inbox"></i>
-                <p>No practice sessions yet. Start your first session above!</p>
-              </div>
-              <ul id="history-list" class="history-list">
-                <!-- Session items dynamically injected -->
-              </ul>
-            </div>
-          </div>
+            <button type="submit" class="primary-btn start-btn" style="width: 100%; margin-top: 16px;">
+              <span>Begin Session</span>
+              <i data-lucide="play"></i>
+            </button>
+          </form>
         </div>
       </section>
 
       <!-- 2. PRACTICE VIEW -->
       <section id="practice-view" class="app-view">
-        <div class="practice-container glass-panel">
-          <!-- Session Header (Status, Timer, Controls) -->
+        <div class="practice-container glass-panel" style="justify-content: center; min-height: 400px; padding: 40px 28px;">
+          <!-- Session Header -->
           <div class="practice-header">
             <button id="abort-practice-btn" class="icon-button danger-hover" title="Quit Practice">
               <i data-lucide="x"></i>
@@ -168,100 +92,49 @@
                   <circle id="timer-ring-progress" class="timer-ring-progress" stroke="var(--color-primary)" stroke-width="4" fill="transparent" r="36" cx="40" cy="40"/>
                 </svg>
               </div>
-              <span id="timer-text" class="timer-text">30</span>
-            </div>
-            <div class="session-progress-stats">
-              <div class="progress-pill">
-                <i data-lucide="hash"></i>
-                <span id="live-word-count">0</span>
-              </div>
+              <span id="timer-text" class="timer-text">15</span>
             </div>
           </div>
 
-          <!-- The Core Prompt Word Display -->
-          <div class="prompt-section">
-            <span class="prompt-label">Your starting word is</span>
-            <h2 id="prompt-word" class="prompt-word">Resonance</h2>
-            <div class="noun-category-badge" id="prompt-category-badge">
-              <i data-lucide="tag"></i>
-              <span id="prompt-category-name">Concrete</span>
-            </div>
-          </div>
-
-          <!-- Live Association Feed (visually listing entered words in real time) -->
-          <div class="association-feed-container" id="association-feed-container">
-            <div class="association-feed" id="association-feed">
-              <div class="feed-placeholder">Type your first association below and press Enter...</div>
-            </div>
-          </div>
-
-          <!-- Input Controls -->
-          <div class="practice-input-area">
-            <div class="input-glow-wrapper">
-              <input type="text" id="association-input" placeholder="Type what comes to mind..." autocomplete="off" autofocus>
-              <button id="submit-word-btn" class="send-btn" aria-label="Submit word">
-                <i data-lucide="chevron-right"></i>
-              </button>
-            </div>
-            <p class="input-tip">Press <kbd>Space</kbd> or <kbd>Enter</kbd> to submit a word</p>
+          <!-- Prompt Word Display -->
+          <div class="prompt-section" style="margin: 60px 0;">
+            <span class="prompt-label">Associate in your mind from</span>
+            <h2 id="prompt-word" class="prompt-word" style="font-size: 4.5rem; animation: feedWordSpawn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;">Resonance</h2>
           </div>
         </div>
       </section>
 
       <!-- 3. RESULTS VIEW -->
       <section id="results-view" class="app-view">
-        <div class="results-container">
+        <div class="results-container" style="max-width: 600px;">
           
           <!-- Summary Header -->
           <div class="results-summary-card glass-panel">
-            <div class="results-badge"><i data-lucide="award"></i> Session Complete</div>
-            <h2 class="results-title">Great Flow!</h2>
-            <p class="results-subtitle">You associated <strong id="results-word-count">0</strong> words starting from <span id="results-prompt-word" class="highlight-word">Resonance</span></p>
+            <div class="results-badge"><i data-lucide="brain"></i> Session Complete</div>
+            <h2 class="results-title">Flow Complete!</h2>
+            <p class="results-subtitle">You completed a mental free association session.</p>
             
-            <div class="results-stats-grid">
-              <div class="res-stat-card">
-                <span class="res-stat-val" id="results-wpm">0</span>
-                <span class="res-stat-lbl">WPM Speed</span>
-              </div>
-              <div class="res-stat-card">
-                <span class="res-stat-val" id="results-avg-speed">0.0s</span>
-                <span class="res-stat-lbl">Avg Response</span>
-              </div>
+            <div class="results-stats-grid" style="grid-template-columns: repeat(2, 1fr);">
               <div class="res-stat-card">
                 <span class="res-stat-val" id="results-duration">0s</span>
-                <span class="res-stat-lbl">Total Time</span>
+                <span class="res-stat-lbl">Practice Time</span>
+              </div>
+              <div class="res-stat-card">
+                <span class="res-stat-val" id="results-prompt-word" style="font-size: 1.5rem; word-break: break-all;">Resonance</span>
+                <span class="res-stat-lbl">Prompt Noun</span>
               </div>
             </div>
           </div>
 
-          <!-- Visual Chart Panel -->
-          <div class="visualizer-panel glass-panel">
-            <div class="visualizer-header">
-              <h3 class="panel-subtitle"><i data-lucide="git-branch"></i> Association Network</h3>
-              <p class="panel-desc">Visual map of your stream of consciousness. Node distance reflects your response time.</p>
-            </div>
-            <div class="canvas-container">
-              <canvas id="association-canvas"></canvas>
-            </div>
-          </div>
-
-          <!-- Word List & Actions -->
-          <div class="results-breakdown glass-panel">
-            <h3 class="panel-subtitle"><i data-lucide="list"></i> Association Pathway</h3>
-            <div class="pathway-flow" id="pathway-flow">
-              <!-- Chronological list of words with speed indicators -->
-            </div>
-
-            <div class="results-actions">
-              <button id="retry-btn" class="primary-btn">
-                <i data-lucide="rotate-ccw"></i>
-                <span>Practice Again</span>
-              </button>
-              <button id="dashboard-btn" class="secondary-btn">
-                <i data-lucide="layout-dashboard"></i>
-                <span>Return to Dashboard</span>
-              </button>
-            </div>
+          <div class="results-actions" style="margin-top: 24px; justify-content: center;">
+            <button id="retry-btn" class="primary-btn">
+              <i data-lucide="rotate-ccw"></i>
+              <span>Practice Again</span>
+            </button>
+            <button id="dashboard-btn" class="secondary-btn">
+              <i data-lucide="arrow-left"></i>
+              <span>Back to Setup</span>
+            </button>
           </div>
 
         </div>
@@ -271,13 +144,21 @@
 
     <!-- Footer -->
     <footer class="app-footer">
-      <p>&copy; 2026 AetherFlow. Designed for creative flow and cognitive agility.</p>
+      <p>&copy; 2026 AetherFlow Lite. No tracking. Pure flow.</p>
     </footer>
   </div>
 
-  <!-- Audio elements for haptic-style sounds (Optional - synthesized via Web Audio API in JS to keep project dependency-free!) -->
-
   <!-- App Logic script -->
   <script src="app.js"></script>
+  <!-- Service Worker registration for offline support -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered successfully!', reg.scope))
+          .catch(err => console.log('Service Worker registration failed:', err));
+      });
+    }
+  </script>
 </body>
 </html>
