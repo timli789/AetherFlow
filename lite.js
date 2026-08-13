@@ -149,27 +149,33 @@ const App = {
     const timeoutId = setTimeout(() => controller.abort(), 4000); // 4-second timeout
     
     try {
-      const response = await fetch('https://gist.githubusercontent.com/creikey/42d23d1eec6d764e8a1d9fe7e56915c6/raw/top-1000-nouns.txt', {
-        signal: controller.signal
+      const response = await fetch('https://xrczdjbmwhenkxhyddfo.supabase.co/rest/v1/nouns?select=word', {
+        signal: controller.signal,
+        headers: {
+          'apikey': 'sb_publishable_hDqhfmunNjArj0YSBuW8uQ_zlP23tuV',
+          'Authorization': 'Bearer sb_publishable_hDqhfmunNjArj0YSBuW8uQ_zlP23tuV'
+        }
       });
       clearTimeout(timeoutId);
       
       if (!response.ok) throw new Error("Network response not ok");
       
-      const text = await response.text();
-      const words = text.split('\n')
-        .map(w => w.trim())
-        .filter(w => w.length > 2 && /^[a-zA-Z]+$/.test(w)) // keep alphabetic single words
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1));
-        
-      if (words.length > 100) {
-        localStorage.setItem("aetherflow_custom_nouns", JSON.stringify(words));
-        this.nounsPool = words;
-        console.log(`Successfully synchronized ${words.length} nouns from raw repository!`);
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        const words = data
+          .map(row => row.word ? row.word.trim() : "")
+          .filter(w => w.length > 2 && /^[a-zA-Z]+$/.test(w)) // keep alphabetic strings
+          .map(w => w.charAt(0).toUpperCase() + w.slice(1));
+          
+        if (words.length > 20) {
+          localStorage.setItem("aetherflow_custom_nouns", JSON.stringify(words));
+          this.nounsPool = words;
+          console.log(`Successfully synchronized ${words.length} nouns from Supabase database!`);
+        }
       }
     } catch (err) {
       clearTimeout(timeoutId);
-      console.warn("Background nouns synchronization skipped/failed:", err.message);
+      console.warn("Background nouns synchronization from Supabase failed/skipped:", err.message);
     }
   },
 
