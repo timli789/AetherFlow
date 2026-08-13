@@ -126,7 +126,7 @@ const App = {
     
     // Load custom nouns cache if present
     try {
-      const cached = localStorage.getItem("aetherflow_custom_nouns");
+      const cached = localStorage.getItem("aetherflow_supabase_nouns");
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 50) {
@@ -168,7 +168,7 @@ const App = {
           .map(w => w.charAt(0).toUpperCase() + w.slice(1));
           
         if (words.length > 20) {
-          localStorage.setItem("aetherflow_custom_nouns", JSON.stringify(words));
+          localStorage.setItem("aetherflow_supabase_nouns", JSON.stringify(words));
           this.nounsPool = words;
           console.log(`Successfully synchronized ${words.length} nouns from Supabase database!`);
         }
