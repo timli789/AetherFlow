@@ -1,9 +1,11 @@
-const CACHE_NAME = 'aetherflow-lite-v10';
+const CACHE_NAME = 'aetherflow-v23';
 const ASSETS = [
   'index.html',
   'style.css',
   'app.js',
   'manifest.json',
+  'assets/fonts/fonts.css',
+  'assets/js/lucide.min.js',
   'icon-192.png',
   'icon-512.png',
   'apple-touch-icon.png'
@@ -36,13 +38,16 @@ self.addEventListener('activate', (e) => {
 // Fetch Intercept and Cache First
 self.addEventListener('fetch', (e) => {
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
+    caches.match(e.request, { ignoreSearch: true }).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
       return fetch(e.request).then((networkResponse) => {
         // Cache external scripts like Lucide icons or Google Fonts dynamically when fetched!
-        if (e.request.url.startsWith('http') || e.request.url.includes('unpkg') || e.request.url.includes('fonts')) {
+        // We EXCLUDE any database requests to Supabase so we always get fresh online data.
+        if (!e.request.url.includes('supabase.co') && 
+            !e.request.url.includes('/api/nouns') && 
+            (e.request.url.startsWith('http') || e.request.url.includes('unpkg') || e.request.url.includes('fonts'))) {
           return caches.open(CACHE_NAME).then((cache) => {
             cache.put(e.request, networkResponse.clone());
             return networkResponse;

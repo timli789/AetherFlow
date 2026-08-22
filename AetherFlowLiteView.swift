@@ -101,7 +101,7 @@ struct AetherFlowLiteView: View {
                     .foregroundStyle(LinearGradient(colors: [violetAccent, cyanAccent], startPoint: .topLeading, endPoint: .bottomTrailing))
                     .padding()
                 
-                Text("AetherFlow Lite")
+                Text("AetherFlow")
                     .font(.system(.largeTitle, design: .rounded))
                     .fontWeight(.bold)
                     .foregroundStyle(.white)

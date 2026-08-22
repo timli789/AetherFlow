@@ -1,28 +1,3 @@
-// AetherFlow Lite - Free Association Logic (No Tracking, Only Nouns)
-
-// 1. Evocative Nouns List (~150 words)
-const NOUNS_DATABASE = [
-  "Telescope", "Lighthouse", "Mirror", "Anchor", "Compass", "Violin", "Lantern", "Hourglass", 
-  "Key", "Bridge", "Feather", "Clock", "Bicycle", "Camera", "Backpack", "Fossil", 
-  "Sculpture", "Needle", "Microscope", "Bell", "Candelabra", "Map", "Helmet", "Sundial", 
-  "Puppet", "Window", "Coin", "Castle", "Sailboat", "Hammer", "Mask", "Chessboard", 
-  "Cradle", "Tombstone", "Sword", "Loom", "Teacup", "Bookcase", "Flask", "Saddle", 
-  "Chime", "Cage", "Ladder", "Globe", "Envelope", "Goggles", "Spoon", "Thread",
-  "Infinity", "Paradox", "Silence", "Chaos", "Justice", "Destiny", "Memory", "Illusion", 
-  "Gravity", "Harmony", "Echo", "Dream", "Shadow", "Identity", "Truth", "Time", 
-  "Freedom", "Mystery", "Symphony", "Entropy", "Solitude", "Sovereignty", "Decay", "Rhythm", 
-  "Absence", "Presence", "Origin", "Metaphor", "Legacy", "Void", "Wisdom", "Ignorance", 
-  "Guilt", "Honesty", "Mercy", "Power", "Belief", "Doubt", "Grief", "Rumor", 
-  "Clarity", "Distortion", "Velocity", "Decorum", "Alliance", "Friction", "Balance", "Force", 
-  "Miracle", "Volcano", "Glacier", "Oasis", "Thunder", "Nebula", "Comet", "Ocean", 
-  "Forest", "Desert", "River", "Meadow", "Eclipse", "Sequoia", "Orchid", "Breeze", 
-  "Canyon", "Avalanche", "Coral", "Waterfall", "Meteor", "Tornado", "Island", "Cave", 
-  "Wave", "Cloud", "Crystal", "Hurricane", "Mountain", "Geyser", "Swamp", "Tundra", 
-  "Dune", "Pebble", "Ivy", "Moss", "Cactus", "Galaxy", "Seed", "Root", 
-  "Flame", "Frost", "Dew", "Mist", "Whirlpool", "Ridge", "Star", "Petal", 
-  "Shell", "Sprout"
-];
-
 // Audio Synthesizer using Web Audio API
 const SoundEffects = {
   ctx: null,
@@ -108,7 +83,8 @@ const App = {
   state: {
     currentView: "dashboard-view",
     config: {
-      duration: 15 // Default 15s
+      duration: 15, // Default 15s
+      mode: "association" // Default mode
     },
     session: {
       active: false,
@@ -119,42 +95,72 @@ const App = {
     }
   },
 
-  nounsPool: NOUNS_DATABASE,
+  nounsPool: [],
+  isSyncing: false,
+  startSessionOnSync: false,
 
   init() {
     this.bindEvents();
     
-    // Load custom nouns cache if present
+    // Clear any previously cached nouns in localStorage to enforce online status check
     try {
-      const cached = localStorage.getItem("aetherflow_supabase_nouns");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 50) {
+      localStorage.removeItem("aetherflow_supabase_nouns");
+    } catch (e) {
+      console.warn("Failed to clear localStorage:", e);
+    }
+
+    // Check if nouns are already fetched for this session (prevents reloading on refresh)
+    try {
+      const sessionData = sessionStorage.getItem("aetherflow_session_nouns");
+      if (sessionData) {
+        const parsed = JSON.parse(sessionData);
+        if (Array.isArray(parsed) && parsed.length > 0) {
           this.nounsPool = parsed;
-          console.log(`Loaded ${parsed.length} custom nouns from local cache.`);
+          console.log(`Loaded ${parsed.length} nouns from sessionStorage.`);
         }
       }
     } catch (e) {
-      console.warn("Failed to load cached custom nouns:", e);
+      console.warn("Failed to read sessionStorage:", e);
     }
 
-    this.syncOnlineNouns();
+    // Set up network status tracking
+    window.addEventListener('online', () => this.updateOnlineStatus());
+    window.addEventListener('offline', () => this.updateOnlineStatus());
+    this.updateOnlineStatus();
+
+    // Only sync if the session storage pool is empty
+    if (this.nounsPool.length === 0) {
+      this.syncOnlineNouns();
+    }
     lucide.createIcons();
+    this.dismissLoadingScreen();
   },
 
-  async syncOnlineNouns() {
+  dismissLoadingScreen() {
+    const loader = document.getElementById("app-loading-screen");
+    if (loader) {
+      loader.classList.add("fade-out");
+      setTimeout(() => {
+        loader.remove();
+      }, 400); // matches the 0.4s CSS transition
+    }
+  },
+
+  async syncOnlineNouns(forceStartAfterSync = false) {
     if (navigator.onLine === false) return;
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4-second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second timeout
+    
+    this.isSyncing = true;
+    if (forceStartAfterSync) {
+      this.setLoadingState(true);
+    }
     
     try {
-      const response = await fetch('https://xrczdjbmwhenkxhyddfo.supabase.co/rest/v1/nouns?select=word', {
-        signal: controller.signal,
-        headers: {
-          'apikey': 'sb_publishable_hDqhfmunNjArj0YSBuW8uQ_zlP23tuV',
-          'Authorization': 'Bearer sb_publishable_hDqhfmunNjArj0YSBuW8uQ_zlP23tuV'
-        }
+      // Fetch from local edge proxy to bypass cold boot database latency
+      const response = await fetch('/api/nouns', {
+        signal: controller.signal
       });
       clearTimeout(timeoutId);
       
@@ -167,15 +173,98 @@ const App = {
           .filter(w => w.length > 2 && /^[a-zA-Z]+$/.test(w)) // keep alphabetic strings
           .map(w => w.charAt(0).toUpperCase() + w.slice(1));
           
-        if (words.length > 20) {
-          localStorage.setItem("aetherflow_supabase_nouns", JSON.stringify(words));
+        if (words.length > 0) {
           this.nounsPool = words;
-          console.log(`Successfully synchronized ${words.length} nouns from Supabase database!`);
+          console.log(`Successfully synchronized ${words.length} nouns from local Edge API!`);
+          
+          // Cache in sessionStorage to speed up subsequent reloads
+          try {
+            sessionStorage.setItem("aetherflow_session_nouns", JSON.stringify(words));
+          } catch (e) {
+            console.warn("Failed to save to sessionStorage:", e);
+          }
+
+          // Automatically begin practice session if user was waiting
+          if (this.startSessionOnSync || forceStartAfterSync) {
+            const durationVal = parseInt(document.getElementById("duration-input").value, 10);
+            this.state.config.duration = durationVal;
+            this.startPracticeSession();
+          }
         }
       }
     } catch (err) {
       clearTimeout(timeoutId);
-      console.warn("Background nouns synchronization from Supabase failed/skipped:", err.message);
+      console.warn("Background nouns synchronization failed/skipped:", err.message);
+    } finally {
+      this.isSyncing = false;
+      this.startSessionOnSync = false;
+      this.setLoadingState(false);
+    }
+  },
+
+  setLoadingState(isLoading) {
+    this.isSyncing = isLoading;
+    const startBtn = document.querySelector(".start-btn");
+    if (!startBtn) return;
+    
+    const span = startBtn.querySelector("span");
+    const icon = startBtn.querySelector("i");
+    
+    if (isLoading) {
+      startBtn.setAttribute("disabled", "true");
+      startBtn.style.opacity = "0.7";
+      startBtn.style.pointerEvents = "none";
+      if (span) span.innerText = "Syncing Nouns...";
+      if (icon) {
+        icon.setAttribute("data-lucide", "loader");
+        icon.classList.add("spin-animation");
+      }
+    } else {
+      if (navigator.onLine) {
+        startBtn.removeAttribute("disabled");
+        startBtn.style.opacity = "1";
+        startBtn.style.pointerEvents = "auto";
+        if (span) span.innerText = "Begin Session";
+        if (icon) {
+          icon.setAttribute("data-lucide", "play");
+          icon.classList.remove("spin-animation");
+        }
+      }
+    }
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  },
+
+  updateOnlineStatus() {
+    const isOnline = navigator.onLine;
+    const offlineMsg = document.getElementById("offline-message");
+    const startBtn = document.querySelector(".start-btn");
+    
+    if (isOnline) {
+      if (offlineMsg) offlineMsg.classList.add("hidden");
+      
+      // If we are currently syncing, let the sync status manage the button.
+      // Otherwise, restore the active button.
+      if (!this.isSyncing) {
+        if (startBtn) {
+          startBtn.removeAttribute("disabled");
+          startBtn.style.opacity = "1";
+          startBtn.style.pointerEvents = "auto";
+        }
+      }
+      
+      // Re-fetch nouns if they aren't loaded yet
+      if (this.nounsPool.length === 0) {
+        this.syncOnlineNouns();
+      }
+    } else {
+      if (offlineMsg) offlineMsg.classList.remove("hidden");
+      if (startBtn) {
+        startBtn.setAttribute("disabled", "true");
+        startBtn.style.opacity = "0.5";
+        startBtn.style.pointerEvents = "none";
+      }
     }
   },
 
@@ -213,6 +302,17 @@ const App = {
     const configForm = document.getElementById("config-form");
     configForm.addEventListener("submit", (e) => {
       e.preventDefault();
+      
+      if (this.nounsPool.length === 0) {
+        if (this.isSyncing) {
+          this.setLoadingState(true);
+          this.startSessionOnSync = true;
+        } else {
+          this.syncOnlineNouns(true);
+        }
+        return;
+      }
+
       const durationVal = parseInt(document.getElementById("duration-input").value, 10);
       this.state.config.duration = durationVal;
       this.startPracticeSession();
@@ -231,15 +331,79 @@ const App = {
     document.getElementById("dashboard-btn").addEventListener("click", () => {
       this.showView("dashboard-view");
     });
+
+    // Mode tabs select
+    const modeTabs = document.querySelectorAll(".mode-tab");
+    modeTabs.forEach(tab => {
+      tab.addEventListener("click", (e) => {
+        const targetTab = e.target.closest(".mode-tab");
+        modeTabs.forEach(t => t.classList.remove("active"));
+        targetTab.classList.add("active");
+        
+        const mode = targetTab.getAttribute("data-mode");
+        this.state.config.mode = mode;
+      });
+    });
   },
 
   // Practice Flow Management
   startPracticeSession() {
+    if (!navigator.onLine || this.nounsPool.length === 0) {
+      alert("Cannot start session. A live internet connection is required to fetch words from Supabase.");
+      this.updateOnlineStatus();
+      return;
+    }
     SoundEffects.init();
     
-    // Choose starting random noun from active pool (resolved cache or default database)
-    const randomIndex = Math.floor(Math.random() * this.nounsPool.length);
-    const chosenWord = this.nounsPool[randomIndex];
+    let chosenWord = "";
+    const promptWordEl = document.getElementById("prompt-word");
+    const instructionEl = document.getElementById("prompt-instruction");
+
+    if (this.state.config.mode === "story") {
+      // Pick two distinct random nouns
+      const randomIndex1 = Math.floor(Math.random() * this.nounsPool.length);
+      let randomIndex2 = Math.floor(Math.random() * this.nounsPool.length);
+      while (randomIndex2 === randomIndex1 && this.nounsPool.length > 1) {
+        randomIndex2 = Math.floor(Math.random() * this.nounsPool.length);
+      }
+      const word1 = this.nounsPool[randomIndex1];
+      const word2 = this.nounsPool[randomIndex2];
+      chosenWord = `${word1} & ${word2}`;
+      
+      // Update practice instruction label
+      if (instructionEl) {
+        instructionEl.innerText = "Create a story connecting";
+      }
+
+      // Render two boxed words in column using the maximum length of both words to standardize font size
+      const maxWordLen = Math.max(word1.length, word2.length);
+      promptWordEl.innerHTML = `
+        <div class="prompt-double-container">
+          <div class="word-box">
+            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word1}</span>
+          </div>
+          <div class="word-box" style="animation-delay: 0.12s;">
+            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word2}</span>
+          </div>
+        </div>
+      `;
+    } else {
+      // Single word free association
+      const randomIndex = Math.floor(Math.random() * this.nounsPool.length);
+      chosenWord = this.nounsPool[randomIndex];
+      
+      // Update practice instruction label
+      if (instructionEl) {
+        instructionEl.innerText = "Associate in your mind from";
+      }
+
+      // Render single word encased in box
+      promptWordEl.innerHTML = `
+        <div class="word-box">
+          <span class="word-box-text" style="--word-len: ${chosenWord.length}">${chosenWord}</span>
+        </div>
+      `;
+    }
 
     // Reset Practice State
     this.state.session = {
@@ -249,9 +413,6 @@ const App = {
       timeLeft: this.state.config.duration,
       totalDuration: this.state.config.duration
     };
-
-    // Update Practice View elements
-    document.getElementById("prompt-word").innerText = chosenWord;
 
     // Show Practice View
     this.showView("practice-view");
@@ -316,7 +477,39 @@ const App = {
   displaySessionResults(session) {
     // Update summary card text
     document.getElementById("results-duration").innerText = session.duration + "s";
-    document.getElementById("results-prompt-word").innerText = session.promptWord;
+    
+    // Inject boxed layouts for results prompts
+    const promptWordEl = document.getElementById("results-prompt-word");
+    if (this.state.config.mode === "story") {
+      const words = session.promptWord.split(" & ");
+      const word1 = words[0];
+      const word2 = words[1];
+      const maxWordLen = Math.max(word1.length, word2.length);
+      
+      promptWordEl.innerHTML = `
+        <div class="prompt-double-container">
+          <div class="word-box">
+            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word1}</span>
+          </div>
+          <div class="word-box">
+            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word2}</span>
+          </div>
+        </div>
+      `;
+    } else {
+      const word = session.promptWord;
+      promptWordEl.innerHTML = `
+        <div class="word-box">
+          <span class="word-box-text" style="--word-len: ${word.length}">${word}</span>
+        </div>
+      `;
+    }
+
+    // Update prompt label depending on mode
+    const promptLabelEl = document.getElementById("results-prompt-label");
+    if (promptLabelEl) {
+      promptLabelEl.innerText = this.state.config.mode === "story" ? "Prompt Nouns" : "Prompt Noun";
+    }
 
     // Set heading text
     const titleEl = document.querySelector(".results-title");
