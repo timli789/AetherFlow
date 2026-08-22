@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aetherflow-v23';
+const CACHE_NAME = 'aetherflow-v24';
 const ASSETS = [
   'index.html',
   'style.css',
