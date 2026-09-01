@@ -210,11 +210,11 @@
     }
   </style>
   <!-- Local Fonts Stylesheet (Self-hosted for speed) -->
-  <link rel="stylesheet" href="assets/fonts/fonts.css?v=25">
+  <link rel="stylesheet" href="assets/fonts/fonts.css?v=26">
   <!-- Lucide Icons (Self-hosted & Deferred for performance) -->
-  <script src="assets/js/lucide.min.js?v=25" defer></script>
+  <script src="assets/js/lucide.min.js?v=26" defer></script>
   <!-- App Stylesheet (Reuses main styling) -->
-  <link rel="stylesheet" href="style.css?v=25">
+  <link rel="stylesheet" href="style.css?v=26">
   <style>
     /* Custom modifications for Lite view layout */
     .lite-setup-container {
@@ -389,7 +389,7 @@
   </div>
 
   <!-- App Logic script -->
-  <script src="app.js?v=25"></script>
+  <script src="app.js?v=26"></script>
   <!-- Service Worker registration for offline support -->
   <script>
     if ('serviceWorker' in navigator) {
@@ -403,7 +403,7 @@
       });
 
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js?v=25')
+        navigator.serviceWorker.register('sw.js?v=26')
           .then(reg => {
             console.log('Service Worker registered successfully!', reg.scope);
             // Check for updates immediately

@@ -117,17 +117,13 @@ const App = {
   isSyncing: false,
   startSessionOnSync: false,
 
-  async init() {
+  init() {
     this.bindEvents();
     
-    // Clear any previously cached nouns in localStorage to enforce online status check
-    try {
-      localStorage.removeItem("aetherflow_supabase_nouns");
-    } catch (e) {
-      console.warn("Failed to clear localStorage:", e);
-    }
+    // Always initialize with instant fallback nouns (0ms)
+    this.nounsPool = [...DEFAULT_FALLBACK_NOUNS];
 
-    // Check if nouns are already fetched for this session (prevents reloading on refresh)
+    // Check if nouns were cached in sessionStorage
     try {
       const sessionData = sessionStorage.getItem("aetherflow_session_nouns");
       if (sessionData) {
@@ -146,36 +142,15 @@ const App = {
     window.addEventListener('offline', () => this.updateOnlineStatus());
     this.updateOnlineStatus();
 
-    const minSplashDuration = new Promise(resolve => setTimeout(resolve, 600));
-
-    // If session storage pool is empty, sync online nouns while splash is up
-    if (this.nounsPool.length === 0) {
-      this.updateLoaderSubtitle("Preparing word bank...");
-      await Promise.race([
-        this.syncOnlineNouns(),
-        new Promise(resolve => setTimeout(resolve, 3000))
-      ]);
-    }
-
-    // Ensure fallback nouns if sync was slow or offline
-    if (this.nounsPool.length === 0) {
-      this.nounsPool = [...DEFAULT_FALLBACK_NOUNS];
-    }
-
-    // Wait for fonts if supported
-    if (document.fonts && document.fonts.ready) {
-      try {
-        await Promise.race([
-          document.fonts.ready,
-          new Promise(resolve => setTimeout(resolve, 800))
-        ]);
-      } catch (e) {}
-    }
-
-    await minSplashDuration;
+    // Trigger online sync non-blocking in the background
+    this.syncOnlineNouns();
 
     lucide.createIcons();
-    this.dismissLoadingScreen();
+
+    // Quick, smooth 200ms transition to dashboard
+    setTimeout(() => {
+      this.dismissLoadingScreen();
+    }, 200);
   },
 
   updateLoaderSubtitle(text) {
