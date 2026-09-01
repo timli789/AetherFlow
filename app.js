@@ -147,10 +147,10 @@ const App = {
 
     lucide.createIcons();
 
-    // Quick, smooth 200ms transition to dashboard
+    // Smooth 800ms animated splash presentation while background assets settle
     setTimeout(() => {
       this.dismissLoadingScreen();
-    }, 200);
+    }, 800);
   },
 
   updateLoaderSubtitle(text) {
