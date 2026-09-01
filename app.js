@@ -1,3 +1,21 @@
+// Fallback Noun List for instant offline / slow network cold boot
+const DEFAULT_FALLBACK_NOUNS = [
+  "Accordion", "Anchor", "Apron", "Badminton", "Beach", "Blender", "Blizzard", 
+  "Cactus", "Carousel", "Chrysalis", "Coral Reef", "Daydream", "Dendrite", "Dentist", 
+  "Dinosaur", "Eclipse", "Egg", "Embers", "Eruption", "Feather", "Fingerprint", 
+  "Fire Escape", "Flashlight", "Garden Gnome", "Glacier", "Gorge", "Guitar", "Hammock", 
+  "Hibernation", "Hinge", "Houseplant", "Iceberg", "Igloo", "Iris", "Irrigation", 
+  "Javelin", "Jellyfish", "Judo", "Jukebox", "Kaleidoscope", "Kiln", "Knapsack", 
+  "Knuckle", "Lattice", "Lava", "Lighthouse", "Loom", "Magnolia", "Meadow", 
+  "Mermaid", "Meteor", "Nebula", "Necklace", "Nestling", "Nightclub", "Oasis", 
+  "Obelisk", "Olive", "Orchid", "Parachute", "Pendulum", "Platypus", "Puppet", 
+  "Quarry", "Quartz", "Quicksand", "Rafting", "Rainbow", "Riverbed", "Roulette", 
+  "Sandcastle", "Silt", "Spaceship", "Staircase", "Telescope", "Thimble", "Tornado", 
+  "Trampoline", "Umbrella", "Unicorn", "Updraft", "Urchin", "Velvet", "Viewport", 
+  "Volcano", "Vortex", "Waffle", "Wharf", "Wheat field", "Windmill", "Xeric", 
+  "Xrays", "Xylophone", "Yacht", "Yawn", "Yearbook", "Zeppelin", "Zipper", "Zither"
+];
+
 // Audio Synthesizer using Web Audio API
 const SoundEffects = {
   ctx: null,
@@ -99,7 +117,7 @@ const App = {
   isSyncing: false,
   startSessionOnSync: false,
 
-  init() {
+  async init() {
     this.bindEvents();
     
     // Clear any previously cached nouns in localStorage to enforce online status check
@@ -128,12 +146,41 @@ const App = {
     window.addEventListener('offline', () => this.updateOnlineStatus());
     this.updateOnlineStatus();
 
-    // Only sync if the session storage pool is empty
+    const minSplashDuration = new Promise(resolve => setTimeout(resolve, 600));
+
+    // If session storage pool is empty, sync online nouns while splash is up
     if (this.nounsPool.length === 0) {
-      this.syncOnlineNouns();
+      this.updateLoaderSubtitle("Preparing word bank...");
+      await Promise.race([
+        this.syncOnlineNouns(),
+        new Promise(resolve => setTimeout(resolve, 3000))
+      ]);
     }
+
+    // Ensure fallback nouns if sync was slow or offline
+    if (this.nounsPool.length === 0) {
+      this.nounsPool = [...DEFAULT_FALLBACK_NOUNS];
+    }
+
+    // Wait for fonts if supported
+    if (document.fonts && document.fonts.ready) {
+      try {
+        await Promise.race([
+          document.fonts.ready,
+          new Promise(resolve => setTimeout(resolve, 800))
+        ]);
+      } catch (e) {}
+    }
+
+    await minSplashDuration;
+
     lucide.createIcons();
     this.dismissLoadingScreen();
+  },
+
+  updateLoaderSubtitle(text) {
+    const sub = document.querySelector("#app-loading-screen .loader-subtitle");
+    if (sub) sub.innerText = text;
   },
 
   dismissLoadingScreen() {
@@ -195,6 +242,9 @@ const App = {
     } catch (err) {
       clearTimeout(timeoutId);
       console.warn("Background nouns synchronization failed/skipped:", err.message);
+      if (this.nounsPool.length === 0) {
+        this.nounsPool = [...DEFAULT_FALLBACK_NOUNS];
+      }
     } finally {
       this.isSyncing = false;
       this.startSessionOnSync = false;
@@ -348,10 +398,8 @@ const App = {
 
   // Practice Flow Management
   startPracticeSession() {
-    if (!navigator.onLine || this.nounsPool.length === 0) {
-      alert("Cannot start session. A live internet connection is required to fetch words from Supabase.");
-      this.updateOnlineStatus();
-      return;
+    if (this.nounsPool.length === 0) {
+      this.nounsPool = [...DEFAULT_FALLBACK_NOUNS];
     }
     SoundEffects.init();
     

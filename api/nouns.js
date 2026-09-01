@@ -1,9 +1,9 @@
 export default async function handler(req, res) {
   try {
-    const response = await fetch('https://xrczdjbmwhenkxhyddfo.supabase.co/rest/v1/nouns?select=word', {
+    const response = await fetch('https://diryaljjfcucuvzyelvk.supabase.co/rest/v1/nouns?select=word', {
       headers: {
-        'apikey': 'sb_publishable_hDqhfmunNjArj0YSBuW8uQ_zlP23tuV',
-        'Authorization': 'Bearer sb_publishable_hDqhfmunNjArj0YSBuW8uQ_zlP23tuV'
+        'apikey': 'sb_publishable_puw8xu-OwPWKAtVgaWpiTg_CjOO93lF',
+        'Authorization': 'Bearer sb_publishable_puw8xu-OwPWKAtVgaWpiTg_CjOO93lF'
       }
     });
 
