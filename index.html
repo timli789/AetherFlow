@@ -358,12 +358,15 @@
       });
 
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js?v=27')
-          .then(reg => {
-            console.log('Service Worker registered successfully!', reg.scope);
-            reg.update();
-          })
-          .catch(err => console.log('Service Worker registration failed:', err));
+        // Delay SW registration by 3 seconds so background caching never competes with launch animations
+        setTimeout(() => {
+          navigator.serviceWorker.register('sw.js?v=27')
+            .then(reg => {
+              console.log('Service Worker registered successfully!', reg.scope);
+              reg.update();
+            })
+            .catch(err => console.log('Service Worker registration failed:', err));
+        }, 3000);
       });
     }
   </script>

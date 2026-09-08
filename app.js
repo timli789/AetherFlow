@@ -134,7 +134,7 @@ const App = {
     }
   },
 
-  async init() {
+  init() {
     this.bindEvents();
     
     // Always initialize with instant fallback nouns (0ms)
@@ -161,21 +161,13 @@ const App = {
 
     this.renderIcons();
 
-    // Trigger online sync non-blocking, but coordinate splash screen dismissal with it
-    this.updateLoaderSubtitle("Preparing flow state...");
+    // Trigger online sync non-blocking completely in background
+    this.syncOnlineNouns();
 
-    const minSplashDelay = new Promise(resolve => setTimeout(resolve, 500));
-    const maxSplashTimeout = new Promise(resolve => setTimeout(resolve, 900));
-    const syncPromise = this.syncOnlineNouns();
-
-    // Wait for minimum smooth animation delay and fast sync (or max 900ms splash limit)
-    await minSplashDelay;
-    await Promise.race([syncPromise, maxSplashTimeout]);
-
-    this.updateLoaderSubtitle("Ready!");
+    // Silky smooth 300ms presentation, then start seamless fade-out
     setTimeout(() => {
       this.dismissLoadingScreen();
-    }, 150);
+    }, 300);
   },
 
   updateLoaderSubtitle(text) {
@@ -187,11 +179,12 @@ const App = {
     const loader = document.getElementById("app-loading-screen");
     if (loader) {
       loader.style.pointerEvents = "none";
-      loader.style.display = "none";
       loader.classList.add("fade-out");
-      try {
-        loader.remove();
-      } catch (e) {}
+      setTimeout(() => {
+        if (loader && loader.parentNode) {
+          loader.parentNode.removeChild(loader);
+        }
+      }, 400); // allow 0.4s CSS opacity fade-out animation to complete smoothly
     }
   },
 
