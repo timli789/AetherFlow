@@ -164,10 +164,8 @@ const App = {
     // Trigger online sync non-blocking completely in background
     this.syncOnlineNouns();
 
-    // Ultra-fast 120ms presentation, then start seamless fade-out
-    setTimeout(() => {
-      this.dismissLoadingScreen();
-    }, 120);
+    // Instant 0ms presentation, start fade-out immediately on init
+    this.dismissLoadingScreen();
   },
 
   updateLoaderSubtitle(text) {

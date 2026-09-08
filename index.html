@@ -163,10 +163,10 @@
     }
   </style>
   <!-- Local Fonts & App Stylesheet (Synchronous for zero render latency) -->
-  <link rel="stylesheet" href="assets/fonts/fonts.css?v=27">
-  <link rel="stylesheet" href="style.css?v=27">
+  <link rel="stylesheet" href="assets/fonts/fonts.css?v=28">
+  <link rel="stylesheet" href="style.css?v=28">
   <!-- Lucide Icons -->
-  <script src="assets/js/lucide.min.js?v=27"></script>
+  <script src="assets/js/lucide.min.js?v=28"></script>
   <style>
     /* Custom modifications for Lite view layout */
     .lite-setup-container {
@@ -341,7 +341,7 @@
   </div>
 
   <!-- App Logic script -->
-  <script src="app.js?v=27"></script>
+  <script src="app.js?v=28"></script>
   <!-- Service Worker registration for offline support -->
   <script>
     if ('serviceWorker' in navigator) {
@@ -360,7 +360,7 @@
       window.addEventListener('load', () => {
         // Delay SW registration by 3 seconds so background caching never competes with launch animations
         setTimeout(() => {
-          navigator.serviceWorker.register('sw.js?v=27')
+          navigator.serviceWorker.register('sw.js?v=28')
             .then(reg => {
               console.log('Service Worker registered successfully!', reg.scope);
               reg.update();
