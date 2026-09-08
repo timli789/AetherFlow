@@ -163,27 +163,6 @@ const App = {
 
     // Trigger online sync non-blocking completely in background
     this.syncOnlineNouns();
-
-    // Instant 0ms presentation, start fade-out immediately on init
-    this.dismissLoadingScreen();
-  },
-
-  updateLoaderSubtitle(text) {
-    const sub = document.querySelector("#app-loading-screen .loader-subtitle");
-    if (sub) sub.innerText = text;
-  },
-
-  dismissLoadingScreen() {
-    const loader = document.getElementById("app-loading-screen");
-    if (loader) {
-      loader.style.pointerEvents = "none";
-      loader.classList.add("fade-out");
-      setTimeout(() => {
-        if (loader && loader.parentNode) {
-          loader.parentNode.removeChild(loader);
-        }
-      }, 180); // matches the ultra-fast 0.18s CSS opacity fade-out animation
-    }
   },
 
   async syncOnlineNouns(forceStartAfterSync = false) {

@@ -19,156 +19,6 @@
     html, body {
       background-color: #080913 !important;
     }
-    
-    #app-loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #080913;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 99999;
-      opacity: 1;
-      transition: opacity 0.18s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-    
-    #app-loading-screen.fade-out {
-      opacity: 0 !important;
-      pointer-events: none !important;
-      visibility: hidden !important;
-    }
-    
-    .loader-glow {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      z-index: 1;
-      pointer-events: none;
-      opacity: 0.3;
-    }
-    .loader-glow-1 {
-      width: 250px;
-      height: 250px;
-      background: radial-gradient(circle, hsl(263, 85%, 64%) 0%, transparent 70%);
-      top: 20%;
-      left: 15%;
-    }
-    .loader-glow-2 {
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, hsl(180, 80%, 50%) 0%, transparent 70%);
-      bottom: 20%;
-      right: 15%;
-    }
-    
-    .loader-content {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 20px;
-    }
-    
-    .loader-logo {
-      width: 90px;
-      height: 90px;
-      margin-bottom: 24px;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-      animation: loaderPulse 2s ease-in-out infinite;
-    }
-    
-    .loader-icon {
-      width: 44px;
-      height: 44px;
-      stroke-width: 1.5;
-      filter: drop-shadow(0 0 10px hsla(263, 85%, 64%, 0.4));
-    }
-    
-    .loader-title {
-      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: #f1f3f9;
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #fff 30%, #9aa2b9 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .loader-subtitle {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 0.95rem;
-      color: #9aa2b9;
-      margin-bottom: 40px;
-      letter-spacing: 0.5px;
-    }
-    
-    .loader-progress-track {
-      width: 180px;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 2px;
-      overflow: hidden;
-      position: relative;
-    }
-    
-    .loader-progress-bar {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, hsl(263, 85%, 64%), hsl(180, 80%, 50%));
-      border-radius: 2px;
-      position: absolute;
-      left: 0;
-      top: 0;
-      animation: loaderProgressFill 0.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-      box-shadow: 0 0 10px hsla(180, 80%, 50%, 0.6);
-    }
-    
-    @keyframes loaderPulse {
-      0%, 100% {
-        transform: translateY(0) scale(1);
-        border-color: rgba(255, 255, 255, 0.08);
-      }
-      50% {
-        transform: translateY(-6px) scale(1.02);
-        border-color: hsla(263, 85%, 64%, 0.2);
-        box-shadow: 0 12px 40px 0 rgba(139, 92, 246, 0.2);
-      }
-    }
-    
-    @keyframes loaderProgressFill {
-      0% {
-        width: 0%;
-      }
-      65% {
-        width: 80%;
-      }
-      100% {
-        width: 100%;
-      }
-    }
-  </style>
-  <!-- Local Fonts & App Stylesheet (Synchronous for zero render latency) -->
-  <link rel="stylesheet" href="assets/fonts/fonts.css?v=28">
-  <link rel="stylesheet" href="style.css?v=28">
-  <!-- Lucide Icons -->
-  <script src="assets/js/lucide.min.js?v=28"></script>
-  <style>
-    /* Custom modifications for Lite view layout */
     .lite-setup-container {
       max-width: 480px;
       margin: 40px auto;
@@ -176,34 +26,6 @@
   </style>
 </head>
 <body>
-  <!-- Premium Load Screen -->
-  <div id="app-loading-screen">
-    <div class="loader-glow loader-glow-1"></div>
-    <div class="loader-glow loader-glow-2"></div>
-    <div class="loader-content">
-      <div class="loader-logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="loader-icon">
-          <defs>
-            <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="hsl(263, 85%, 64%)" />
-              <stop offset="100%" stop-color="hsl(180, 80%, 50%)" />
-            </linearGradient>
-          </defs>
-          <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
-          <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
-          <path d="M12 5v14"/>
-          <path d="M12 9h4a2 2 0 0 0 0-4h-4"/>
-          <path d="M12 14h-4a2 2 0 0 0 0 4h4"/>
-        </svg>
-      </div>
-      <div class="loader-title">AetherFlow</div>
-      <div class="loader-subtitle">Preparing flow state...</div>
-      <div class="loader-progress-track">
-        <div class="loader-progress-bar"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- Ambient background glow elements -->
   <div class="ambient-glow glow-1"></div>
   <div class="ambient-glow glow-2"></div>
@@ -342,32 +164,19 @@
 
   <!-- App Logic script -->
   <script src="app.js?v=28"></script>
-  <!-- Service Worker registration for offline support -->
+  <!-- Force unregister any legacy service workers and clear cache storage -->
   <script>
     if ('serviceWorker' in navigator) {
-      const hadController = Boolean(navigator.serviceWorker.controller);
-      let refreshing = false;
-      
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        // Only force reload if there was already an active controller when the page loaded
-        // (meaning an updated SW was installed), avoiding page reloads on cold first register.
-        if (hadController && !refreshing) {
-          refreshing = true;
-          window.location.reload();
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+          registration.unregister();
         }
       });
-
-      window.addEventListener('load', () => {
-        // Delay SW registration by 3 seconds so background caching never competes with launch animations
-        setTimeout(() => {
-          navigator.serviceWorker.register('sw.js?v=28')
-            .then(reg => {
-              console.log('Service Worker registered successfully!', reg.scope);
-              reg.update();
-            })
-            .catch(err => console.log('Service Worker registration failed:', err));
-        }, 3000);
-      });
+      if (window.caches) {
+        caches.keys().then(names => {
+          for (let name of names) caches.delete(name);
+        });
+      }
     }
   </script>
 </body>
