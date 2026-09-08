@@ -47,6 +47,7 @@ struct AetherFlowLiteView: View {
     @State private var promptsPracticed: [String] = []
     @State private var currentPrompt: String = ""
     @State private var timeLeft: Int = 15
+    @State private var isAppLoaded: Bool = false
     
     // Timer subscription
     @State private var timerSubscription: Timer.TimerPublisher = Timer.publish(every: 1.0, on: .main, in: .common)
@@ -76,6 +77,7 @@ struct AetherFlowLiteView: View {
             switch currentView {
             case .setup:
                 setupView
+                    .opacity(isAppLoaded ? 1.0 : 0.0)
                     .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing)))
             case .practice:
                 practiceView
@@ -83,6 +85,11 @@ struct AetherFlowLiteView: View {
             case .results:
                 resultsView
                     .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+            }
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.3)) {
+                isAppLoaded = true
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.82), value: currentView)

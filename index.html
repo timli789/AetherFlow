@@ -349,10 +349,13 @@
   <!-- Service Worker registration for offline support -->
   <script>
     if ('serviceWorker' in navigator) {
-      // Force reload when a new service worker takes control
+      const hadController = Boolean(navigator.serviceWorker.controller);
       let refreshing = false;
+      
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
+        // Only force reload if there was already an active controller when the page loaded
+        // (meaning an updated SW was installed), avoiding page reloads on cold first register.
+        if (hadController && !refreshing) {
           refreshing = true;
           window.location.reload();
         }
@@ -362,7 +365,6 @@
         navigator.serviceWorker.register('sw.js?v=27')
           .then(reg => {
             console.log('Service Worker registered successfully!', reg.scope);
-            // Check for updates immediately
             reg.update();
           })
           .catch(err => console.log('Service Worker registration failed:', err));

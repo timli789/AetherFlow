@@ -117,7 +117,17 @@ const App = {
   isSyncing: false,
   startSessionOnSync: false,
 
-  init() {
+  renderIcons() {
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      try {
+        window.lucide.createIcons();
+      } catch (e) {
+        console.warn("Lucide icons render skipped:", e);
+      }
+    }
+  },
+
+  async init() {
     this.bindEvents();
     
     // Always initialize with instant fallback nouns (0ms)
@@ -142,15 +152,23 @@ const App = {
     window.addEventListener('offline', () => this.updateOnlineStatus());
     this.updateOnlineStatus();
 
-    // Trigger online sync non-blocking in the background
-    this.syncOnlineNouns();
+    this.renderIcons();
 
-    lucide.createIcons();
+    // Trigger online sync non-blocking, but coordinate splash screen dismissal with it
+    this.updateLoaderSubtitle("Preparing flow state...");
 
-    // Smooth 800ms animated splash presentation while background assets settle
+    const minSplashDelay = new Promise(resolve => setTimeout(resolve, 500));
+    const maxSplashTimeout = new Promise(resolve => setTimeout(resolve, 900));
+    const syncPromise = this.syncOnlineNouns();
+
+    // Wait for minimum smooth animation delay and fast sync (or max 900ms splash limit)
+    await minSplashDelay;
+    await Promise.race([syncPromise, maxSplashTimeout]);
+
+    this.updateLoaderSubtitle("Ready!");
     setTimeout(() => {
       this.dismissLoadingScreen();
-    }, 800);
+    }, 150);
   },
 
   updateLoaderSubtitle(text) {
@@ -161,6 +179,7 @@ const App = {
   dismissLoadingScreen() {
     const loader = document.getElementById("app-loading-screen");
     if (loader) {
+      loader.style.pointerEvents = "none";
       loader.classList.add("fade-out");
       setTimeout(() => {
         loader.remove();
@@ -172,7 +191,7 @@ const App = {
     if (navigator.onLine === false) return;
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 1500); // Fast 1.5-second timeout
     
     this.isSyncing = true;
     if (forceStartAfterSync) {
@@ -256,9 +275,7 @@ const App = {
         }
       }
     }
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
+    this.renderIcons();
   },
 
   updateOnlineStatus() {
@@ -439,7 +456,7 @@ const App = {
 
     // Show Practice View
     this.showView("practice-view");
-    lucide.createIcons();
+    this.renderIcons();
 
     // Setup Timer
     this.updateTimerDisplay();
@@ -538,7 +555,7 @@ const App = {
     const titleEl = document.querySelector(".results-title");
     titleEl.innerText = "Deep Focus!";
 
-    lucide.createIcons();
+    this.renderIcons();
     this.showView("results-view");
   }
 };
