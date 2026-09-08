@@ -14,7 +14,13 @@
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f6fc">
   
   <title>AetherFlow - Free Association Practice</title>
-  <!-- Inline loading screen styles to prevent white flash during PWA launch -->
+  <!-- App Stylesheet (Synchronous in head for 0ms style paint) -->
+  <link rel="stylesheet" href="style.css?v=29">
+  <!-- Local Fonts (Non-blocking so system fonts display instantly) -->
+  <link rel="stylesheet" href="assets/fonts/fonts.css?v=29" media="print" onload="this.media='all'">
+  <!-- Lucide Icons -->
+  <script src="assets/js/lucide.min.js?v=29"></script>
+
   <style>
     html, body {
       background-color: #080913 !important;
@@ -163,7 +169,7 @@
   </div>
 
   <!-- App Logic script -->
-  <script src="app.js?v=28"></script>
+  <script src="app.js?v=29"></script>
   <!-- Force unregister any legacy service workers and clear cache storage -->
   <script>
     if ('serviceWorker' in navigator) {
