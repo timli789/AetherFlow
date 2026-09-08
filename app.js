@@ -164,10 +164,10 @@ const App = {
     // Trigger online sync non-blocking completely in background
     this.syncOnlineNouns();
 
-    // Silky smooth 400ms presentation matching progress fill animation, then start seamless fade-out
+    // Ultra-fast 120ms presentation, then start seamless fade-out
     setTimeout(() => {
       this.dismissLoadingScreen();
-    }, 400);
+    }, 120);
   },
 
   updateLoaderSubtitle(text) {
@@ -184,7 +184,7 @@ const App = {
         if (loader && loader.parentNode) {
           loader.parentNode.removeChild(loader);
         }
-      }, 400); // allow 0.4s CSS opacity fade-out animation to complete smoothly
+      }, 180); // matches the ultra-fast 0.18s CSS opacity fade-out animation
     }
   },
 
