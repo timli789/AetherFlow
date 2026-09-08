@@ -127,13 +127,15 @@
     }
     
     .loader-progress-bar {
-      width: 40%;
+      width: 0%;
       height: 100%;
       background: linear-gradient(90deg, hsl(263, 85%, 64%), hsl(180, 80%, 50%));
       border-radius: 2px;
       position: absolute;
-      animation: loaderIndeterminate 1.8s ease-in-out infinite;
-      box-shadow: 0 0 8px hsla(180, 80%, 50%, 0.5);
+      left: 0;
+      top: 0;
+      animation: loaderProgressFill 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      box-shadow: 0 0 10px hsla(180, 80%, 50%, 0.6);
     }
     
     @keyframes loaderPulse {
@@ -148,17 +150,15 @@
       }
     }
     
-    @keyframes loaderIndeterminate {
+    @keyframes loaderProgressFill {
       0% {
-        left: -40%;
+        width: 0%;
       }
-      50% {
-        left: 100%;
-        width: 30%;
+      65% {
+        width: 80%;
       }
       100% {
-        left: 100%;
-        width: 0%;
+        width: 100%;
       }
     }
   </style>

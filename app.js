@@ -164,10 +164,10 @@ const App = {
     // Trigger online sync non-blocking completely in background
     this.syncOnlineNouns();
 
-    // Silky smooth 300ms presentation, then start seamless fade-out
+    // Silky smooth 400ms presentation matching progress fill animation, then start seamless fade-out
     setTimeout(() => {
       this.dismissLoadingScreen();
-    }, 300);
+    }, 400);
   },
 
   updateLoaderSubtitle(text) {
