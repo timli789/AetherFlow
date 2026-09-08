@@ -77,7 +77,6 @@ struct AetherFlowLiteView: View {
             switch currentView {
             case .setup:
                 setupView
-                    .opacity(isAppLoaded ? 1.0 : 0.0)
                     .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing)))
             case .practice:
                 practiceView
@@ -85,11 +84,6 @@ struct AetherFlowLiteView: View {
             case .results:
                 resultsView
                     .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-            }
-        }
-        .onAppear {
-            withAnimation(.easeOut(duration: 0.3)) {
-                isAppLoaded = true
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.82), value: currentView)

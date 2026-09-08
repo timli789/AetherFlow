@@ -21,11 +21,18 @@ const SoundEffects = {
   ctx: null,
   
   init() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
+    try {
+      if (!this.ctx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          this.ctx = new AudioContextClass();
+        }
+      }
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
+    } catch (e) {
+      console.warn("SoundEffects init error:", e);
     }
   },
 
@@ -180,10 +187,11 @@ const App = {
     const loader = document.getElementById("app-loading-screen");
     if (loader) {
       loader.style.pointerEvents = "none";
+      loader.style.display = "none";
       loader.classList.add("fade-out");
-      setTimeout(() => {
+      try {
         loader.remove();
-      }, 400); // matches the 0.4s CSS transition
+      } catch (e) {}
     }
   },
 

@@ -63,11 +63,24 @@ body.light-mode {
   -webkit-tap-highlight-color: transparent;
 }
 
+button,
+.primary-btn,
+.secondary-btn,
+.duration-btn,
+.icon-button,
+.mode-tab {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+
 button:active,
 .primary-btn:active,
 .secondary-btn:active,
 .duration-btn:active,
-.icon-button:active {
+.icon-button:active,
+.mode-tab:active {
   transform: scale(0.96);
   filter: brightness(0.95);
 }
