@@ -377,34 +377,60 @@ const App = {
     const promptWordEl = document.getElementById("prompt-word");
     const instructionEl = document.getElementById("prompt-instruction");
 
-    if (this.state.config.mode === "story") {
-      // Pick two distinct random nouns
+    if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
+      const is3Word = this.state.config.mode === "story3";
+      
+      // Pick random nouns
       const randomIndex1 = Math.floor(Math.random() * this.nounsPool.length);
+      
       let randomIndex2 = Math.floor(Math.random() * this.nounsPool.length);
       while (randomIndex2 === randomIndex1 && this.nounsPool.length > 1) {
         randomIndex2 = Math.floor(Math.random() * this.nounsPool.length);
       }
+
+      let randomIndex3 = 0;
+      if (is3Word) {
+        randomIndex3 = Math.floor(Math.random() * this.nounsPool.length);
+        while ((randomIndex3 === randomIndex1 || randomIndex3 === randomIndex2) && this.nounsPool.length > 2) {
+          randomIndex3 = Math.floor(Math.random() * this.nounsPool.length);
+        }
+      }
+      
       const word1 = this.nounsPool[randomIndex1];
       const word2 = this.nounsPool[randomIndex2];
-      chosenWord = `${word1} & ${word2}`;
+      const word3 = is3Word ? this.nounsPool[randomIndex3] : null;
+      
+      chosenWord = is3Word ? `${word1} & ${word2} & ${word3}` : `${word1} & ${word2}`;
       
       // Update practice instruction label
       if (instructionEl) {
         instructionEl.innerText = "Create a story connecting";
       }
 
-      // Render two boxed words in column using the maximum length of both words to standardize font size
-      const maxWordLen = Math.max(word1.length, word2.length);
-      promptWordEl.innerHTML = `
+      // Render boxed words in column using the maximum length of all words to standardize font size
+      let maxWordLen = Math.max(word1.length, word2.length);
+      if (is3Word) maxWordLen = Math.max(maxWordLen, word3.length);
+
+      let html = `
         <div class="prompt-double-container">
-          <div class="word-box">
+          <div class="word-box fade-in-up">
             <span class="word-box-text" style="--word-len: ${maxWordLen}">${word1}</span>
           </div>
-          <div class="word-box" style="animation-delay: 0.12s;">
+          <div class="word-box fade-in-up" style="animation-delay: 0.12s;">
             <span class="word-box-text" style="--word-len: ${maxWordLen}">${word2}</span>
           </div>
-        </div>
       `;
+      
+      if (is3Word) {
+        html += `
+          <div class="word-box fade-in-up" style="animation-delay: 0.24s;">
+            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word3}</span>
+          </div>
+        `;
+      }
+      
+      html += `</div>`;
+      promptWordEl.innerHTML = html;
     } else {
       // Single word free association
       const randomIndex = Math.floor(Math.random() * this.nounsPool.length);
@@ -498,22 +524,21 @@ const App = {
     
     // Inject boxed layouts for results prompts
     const promptWordEl = document.getElementById("results-prompt-word");
-    if (this.state.config.mode === "story") {
+    if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
       const words = session.promptWord.split(" & ");
-      const word1 = words[0];
-      const word2 = words[1];
-      const maxWordLen = Math.max(word1.length, word2.length);
+      const maxWordLen = Math.max(...words.map(w => w.length));
       
-      promptWordEl.innerHTML = `
-        <div class="prompt-double-container">
+      let html = '<div class="prompt-double-container">';
+      words.forEach((word) => {
+        html += `
           <div class="word-box">
-            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word1}</span>
+            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word}</span>
           </div>
-          <div class="word-box">
-            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word2}</span>
-          </div>
-        </div>
-      `;
+        `;
+      });
+      html += '</div>';
+      
+      promptWordEl.innerHTML = html;
     } else {
       const word = session.promptWord;
       promptWordEl.innerHTML = `
@@ -526,7 +551,8 @@ const App = {
     // Update prompt label depending on mode
     const promptLabelEl = document.getElementById("results-prompt-label");
     if (promptLabelEl) {
-      promptLabelEl.innerText = this.state.config.mode === "story" ? "Prompt Nouns" : "Prompt Noun";
+      const isMulti = this.state.config.mode === "story" || this.state.config.mode === "story3";
+      promptLabelEl.innerText = isMulti ? "Prompt Nouns" : "Prompt Noun";
     }
 
     // Set heading text

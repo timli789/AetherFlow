@@ -15,11 +15,11 @@
   
   <title>AetherFlow - Free Association Practice</title>
   <!-- App Stylesheet (Synchronous in head for 0ms style paint) -->
-  <link rel="stylesheet" href="style.css?v=29">
+  <link rel="stylesheet" href="style.css?v=30">
   <!-- Local Fonts (Non-blocking so system fonts display instantly) -->
-  <link rel="stylesheet" href="assets/fonts/fonts.css?v=29" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="assets/fonts/fonts.css?v=30" media="print" onload="this.media='all'">
   <!-- Lucide Icons -->
-  <script src="assets/js/lucide.min.js?v=29"></script>
+  <script src="assets/js/lucide.min.js?v=30"></script>
 
   <style>
     html, body {
@@ -67,12 +67,13 @@
           </div>
           <form id="config-form" class="config-form">
             <div class="form-group">
-              <div class="duration-selector" style="grid-template-columns: repeat(5, 1fr);">
+              <div class="duration-selector" style="grid-template-columns: repeat(6, 1fr);">
                 <button type="button" class="duration-btn" data-value="10">10s</button>
                 <button type="button" class="duration-btn active" data-value="15">15s</button>
                 <button type="button" class="duration-btn" data-value="20">20s</button>
                 <button type="button" class="duration-btn" data-value="25">25s</button>
                 <button type="button" class="duration-btn" data-value="30">30s</button>
+                <button type="button" class="duration-btn" data-value="45">45s</button>
               </div>
               <input type="hidden" id="duration-input" value="15">
             </div>
@@ -84,7 +85,7 @@
           </form>
           
           <!-- Mode Selection Bar -->
-          <div class="mode-selector-bar">
+          <div class="mode-selector-bar" style="grid-template-columns: repeat(3, 1fr);">
             <button type="button" class="mode-tab active" data-mode="association">
               <i data-lucide="brain"></i>
               <span>Free Association</span>
@@ -92,6 +93,10 @@
             <button type="button" class="mode-tab" data-mode="story">
               <i data-lucide="book-open"></i>
               <span>2-Word Story</span>
+            </button>
+            <button type="button" class="mode-tab" data-mode="story3">
+              <i data-lucide="library"></i>
+              <span>3-Word Story</span>
             </button>
           </div>
         </div>
@@ -169,7 +174,7 @@
   </div>
 
   <!-- App Logic script -->
-  <script src="app.js?v=29"></script>
+  <script src="app.js?v=30"></script>
   <!-- Force unregister any legacy service workers and clear cache storage -->
   <script>
     if ('serviceWorker' in navigator) {
