@@ -378,13 +378,29 @@ const App = {
     const instructionEl = document.getElementById("prompt-instruction");
 
     if (this.state.config.mode === "acronym") {
-      // Pick 3 or 4 random letters
-      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      // Pick 3 or 4 random letters using weighted English frequencies
       const length = Math.random() < 0.5 ? 3 : 4;
+      
+      const vowels = "AAAAAEEEEEEEEIIIIIOOOOOUUUY";
+      const consonants = "BBCCCNDDDDDFFFFGGGHHHHHJKLLLLLMMMMNNNNNNPPPPQRRRRRRSSSSSSTTTTTTTTVWWXYYYZ";
+      const allLetters = vowels + consonants;
+      
       let acronym = "";
+      let hasVowel = false;
+      
       for (let i = 0; i < length; i++) {
-        acronym += letters.charAt(Math.floor(Math.random() * letters.length));
+        const char = allLetters.charAt(Math.floor(Math.random() * allLetters.length));
+        acronym += char;
+        if (vowels.includes(char)) hasVowel = true;
       }
+      
+      // Enforce at least one vowel to ensure pronounceability
+      if (!hasVowel) {
+        const replaceIdx = Math.floor(Math.random() * length);
+        const forcedVowel = vowels.charAt(Math.floor(Math.random() * vowels.length));
+        acronym = acronym.substring(0, replaceIdx) + forcedVowel + acronym.substring(replaceIdx + 1);
+      }
+      
       // Format as A B C (no dots for cleaner look)
       chosenWord = acronym.split('').join(' ');
       
