@@ -15,11 +15,11 @@
   
   <title>AetherFlow - Free Association Practice</title>
   <!-- App Stylesheet (Synchronous in head for 0ms style paint) -->
-  <link rel="stylesheet" href="style.css?v=43">
+  <link rel="stylesheet" href="style.css?v=44">
   <!-- Local Fonts (Non-blocking so system fonts display instantly) -->
-  <link rel="stylesheet" href="assets/fonts/fonts.css?v=43" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="assets/fonts/fonts.css?v=44" media="print" onload="this.media='all'">
   <!-- Lucide Icons -->
-  <script src="assets/js/lucide.min.js?v=43"></script>
+  <script src="assets/js/lucide.min.js?v=44"></script>
 
   <style>
     html, body {
@@ -78,6 +78,21 @@
               <input type="hidden" id="duration-input" value="15">
             </div>
 
+            <h2 class="section-title" style="justify-content: center; margin-bottom: 12px; margin-top: 16px;">
+              <i data-lucide="layers"></i> 
+              <span>Number of Sessions</span>
+            </h2>
+            <div class="form-group">
+              <div class="duration-selector" style="grid-template-columns: repeat(5, 1fr);">
+                <button type="button" class="round-btn active" data-value="1">1</button>
+                <button type="button" class="round-btn" data-value="2">2</button>
+                <button type="button" class="round-btn" data-value="3">3</button>
+                <button type="button" class="round-btn" data-value="4">4</button>
+                <button type="button" class="round-btn" data-value="5">5</button>
+              </div>
+              <input type="hidden" id="rounds-input" value="1">
+            </div>
+
             <button type="submit" class="primary-btn start-btn" style="width: 100%; margin-top: 16px;">
               <span>Begin Session</span>
               <i data-lucide="play"></i>
@@ -115,6 +130,8 @@
         <div class="practice-container glass-panel" style="justify-content: center; min-height: 400px; padding: 40px 28px;">
           <!-- Session Header -->
           <div class="practice-header">
+            <div id="round-indicator" style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); background: var(--glass-bg); padding: 4px 12px; border-radius: 12px; border: 1px solid var(--glass-border);">Session 1 of 3</div>
+            
             <button id="abort-practice-btn" class="icon-button danger-hover" title="Quit Practice">
               <i data-lucide="x"></i>
             </button>
@@ -187,7 +204,7 @@
   </div>
 
   <!-- App Logic script -->
-  <script src="app.js?v=43"></script>
+  <script src="app.js?v=44"></script>
   <!-- Force unregister any legacy service workers and clear cache storage -->
   <script>
     if ('serviceWorker' in navigator) {

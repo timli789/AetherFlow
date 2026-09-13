@@ -109,11 +109,14 @@ const App = {
     currentView: "dashboard-view",
     config: {
       duration: 15, // Default 15s
-      mode: "association" // Default mode
+      mode: "association", // Default mode
+      rounds: 1
     },
     session: {
       active: false,
       promptWord: null, // The single prompt word for the session
+      history: [],
+      currentRound: 1,
       startTime: null,
       timeLeft: 15,
       totalDuration: 15
@@ -318,6 +321,20 @@ const App = {
       });
     });
 
+    // Rounds select
+    const roundBtns = document.querySelectorAll(".round-btn");
+    roundBtns.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const targetBtn = e.target.closest(".round-btn");
+        roundBtns.forEach(b => b.classList.remove("active"));
+        targetBtn.classList.add("active");
+        
+        const val = parseInt(targetBtn.getAttribute("data-value"), 10);
+        document.getElementById("rounds-input").value = val;
+        this.state.config.rounds = val;
+      });
+    });
+
     // Start Session Form
     const configForm = document.getElementById("config-form");
     configForm.addEventListener("submit", (e) => {
@@ -335,6 +352,11 @@ const App = {
 
       const durationVal = parseInt(document.getElementById("duration-input").value, 10);
       this.state.config.duration = durationVal;
+      
+      // Reset multi-round state
+      this.state.session.history = [];
+      this.state.session.currentRound = 1;
+      
       this.startPracticeSession();
     });
 
@@ -345,8 +367,12 @@ const App = {
 
     // Next Practice (Restart immediately)
     document.getElementById("next-practice-btn").addEventListener("click", () => {
-      // The startPracticeSession method already calls clearInterval(this.timerInterval)
-      this.startPracticeSession();
+      if (this.state.session.currentRound >= this.state.config.rounds) {
+        this.endPracticeSession(false);
+      } else {
+        this.state.session.currentRound++;
+        this.startPracticeSession();
+      }
     });
 
     // Results Actions
@@ -492,14 +518,32 @@ const App = {
       `;
     }
 
+    // Preserve history and round from the outer scope if we are starting/advancing
+    const currentHistory = this.state.session.history || [];
+    const currentRound = this.state.session.currentRound || 1;
+    
+    // Add this word to history
+    currentHistory.push(chosenWord);
+
     // Reset Practice State
     this.state.session = {
       active: true,
       promptWord: chosenWord,
+      history: currentHistory,
+      currentRound: currentRound,
       startTime: Date.now(),
       timeLeft: this.state.config.duration,
       totalDuration: this.state.config.duration
     };
+
+    // Update Round Indicator and Next Button UI
+    document.getElementById("round-indicator").innerText = `Session ${currentRound} of ${this.state.config.rounds}`;
+    const nextBtn = document.getElementById("next-practice-btn");
+    if (currentRound >= this.state.config.rounds) {
+      nextBtn.innerHTML = `<span>Finish</span><i data-lucide="check" style="width: 16px; height: 16px;"></i>`;
+    } else {
+      nextBtn.innerHTML = `<span>Next</span><i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>`;
+    }
 
     // Show Practice View
     this.showView("practice-view");
@@ -522,7 +566,12 @@ const App = {
       
       if (this.state.session.timeLeft <= 0) {
         clearInterval(this.timerInterval);
-        this.endPracticeSession(false);
+        if (this.state.session.currentRound >= this.state.config.rounds) {
+          this.endPracticeSession(false);
+        } else {
+          this.state.session.currentRound++;
+          this.startPracticeSession();
+        }
       }
     }, 1000);
   },
@@ -554,7 +603,7 @@ const App = {
     const durationUsed = this.state.session.totalDuration;
 
     const sessionRecord = {
-      promptWord: this.state.session.promptWord,
+      history: this.state.session.history,
       duration: durationUsed
     };
 
@@ -567,44 +616,52 @@ const App = {
     
     // Inject boxed layouts for results prompts
     const promptWordEl = document.getElementById("results-prompt-word");
-    if (this.state.config.mode === "acronym3" || this.state.config.mode === "acronym4") {
-      promptWordEl.innerHTML = `
-        <div class="word-box">
-          <span class="word-box-text" style="--word-len: ${session.promptWord.length}; letter-spacing: 0.05em; white-space: nowrap;">${session.promptWord}</span>
-        </div>
-      `;
-    } else if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
-      const words = session.promptWord.split(" & ");
-      const maxWordLen = Math.max(...words.map(w => w.length));
+    let allHtml = '<div style="display: flex; flex-direction: column; gap: 32px; max-height: 50vh; overflow-y: auto; padding-right: 8px;">';
+    
+    session.history.forEach((historyWord, idx) => {
+      allHtml += `<div><div style="font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Session ${idx + 1}</div>`;
       
-      let html = '<div class="prompt-double-container">';
-      words.forEach((word) => {
-        html += `
+      if (this.state.config.mode === "acronym3" || this.state.config.mode === "acronym4") {
+        allHtml += `
           <div class="word-box">
-            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word}</span>
+            <span class="word-box-text" style="--word-len: ${historyWord.length}; letter-spacing: 0.05em; white-space: nowrap;">${historyWord}</span>
           </div>
         `;
-      });
-      html += '</div>';
+      } else if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
+        const words = historyWord.split(" & ");
+        const maxWordLen = Math.max(...words.map(w => w.length));
+        
+        let html = '<div class="prompt-double-container">';
+        words.forEach((word) => {
+          html += `
+            <div class="word-box">
+              <span class="word-box-text" style="--word-len: ${maxWordLen}">${word}</span>
+            </div>
+          `;
+        });
+        html += '</div>';
+        allHtml += html;
+      } else {
+        allHtml += `
+          <div class="word-box">
+            <span class="word-box-text" style="--word-len: ${historyWord.length}">${historyWord}</span>
+          </div>
+        `;
+      }
       
-      promptWordEl.innerHTML = html;
-    } else {
-      const word = session.promptWord;
-      promptWordEl.innerHTML = `
-        <div class="word-box">
-          <span class="word-box-text" style="--word-len: ${word.length}">${word}</span>
-        </div>
-      `;
-    }
+      allHtml += `</div>`;
+    });
+    
+    allHtml += '</div>';
+    promptWordEl.innerHTML = allHtml;
 
     // Update prompt label depending on mode
     const promptLabelEl = document.getElementById("results-prompt-label");
     if (promptLabelEl) {
       if (this.state.config.mode === "acronym3" || this.state.config.mode === "acronym4") {
-        promptLabelEl.innerText = "Acronym";
+        promptLabelEl.innerText = "Acronyms";
       } else {
-        const isMulti = this.state.config.mode === "story" || this.state.config.mode === "story3";
-        promptLabelEl.innerText = isMulti ? "Prompt Nouns" : "Prompt Noun";
+        promptLabelEl.innerText = "Prompt Nouns";
       }
     }
 
