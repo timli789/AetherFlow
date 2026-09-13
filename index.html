@@ -15,11 +15,11 @@
   
   <title>AetherFlow - Free Association Practice</title>
   <!-- App Stylesheet (Synchronous in head for 0ms style paint) -->
-  <link rel="stylesheet" href="style.css?v=42">
+  <link rel="stylesheet" href="style.css?v=43">
   <!-- Local Fonts (Non-blocking so system fonts display instantly) -->
-  <link rel="stylesheet" href="assets/fonts/fonts.css?v=42" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="assets/fonts/fonts.css?v=43" media="print" onload="this.media='all'">
   <!-- Lucide Icons -->
-  <script src="assets/js/lucide.min.js?v=42"></script>
+  <script src="assets/js/lucide.min.js?v=43"></script>
 
   <style>
     html, body {
@@ -134,6 +134,11 @@
             <span class="prompt-label" id="prompt-instruction">Associate in your mind from</span>
             <div id="prompt-word" class="prompt-word" style="animation: feedWordSpawn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;">Resonance</div>
           </div>
+          
+          <button id="next-practice-btn" class="secondary-btn" style="position: absolute; bottom: 20px; right: 28px; padding: 8px 16px; font-size: 0.9rem;" title="Next Session">
+            <span>Next</span>
+            <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+          </button>
         </div>
       </section>
 
@@ -182,7 +187,7 @@
   </div>
 
   <!-- App Logic script -->
-  <script src="app.js?v=42"></script>
+  <script src="app.js?v=43"></script>
   <!-- Force unregister any legacy service workers and clear cache storage -->
   <script>
     if ('serviceWorker' in navigator) {

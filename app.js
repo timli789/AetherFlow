@@ -343,6 +343,12 @@ const App = {
       this.endPracticeSession(true);
     });
 
+    // Next Practice (Restart immediately)
+    document.getElementById("next-practice-btn").addEventListener("click", () => {
+      // The startPracticeSession method already calls clearInterval(this.timerInterval)
+      this.startPracticeSession();
+    });
+
     // Results Actions
     document.getElementById("retry-btn").addEventListener("click", () => {
       this.startPracticeSession();
