@@ -377,9 +377,9 @@ const App = {
     const promptWordEl = document.getElementById("prompt-word");
     const instructionEl = document.getElementById("prompt-instruction");
 
-    if (this.state.config.mode === "acronym") {
-      // Pick 3 or 4 random letters using weighted English frequencies
-      const length = Math.random() < 0.5 ? 3 : 4;
+    if (this.state.config.mode === "acronym3" || this.state.config.mode === "acronym4") {
+      // Pick random letters using weighted English frequencies
+      const length = this.state.config.mode === "acronym4" ? 4 : 3;
       
       const vowels = "AAAAAEEEEEEEEIIIIIOOOOOUUUY";
       const consonants = "BBCCCNDDDDDFFFFGGGHHHHHJKLLLLLMMMMNNNNNNPPPPQRRRRRRSSSSSSTTTTTTTTVWWXYYYZ";
@@ -561,7 +561,7 @@ const App = {
     
     // Inject boxed layouts for results prompts
     const promptWordEl = document.getElementById("results-prompt-word");
-    if (this.state.config.mode === "acronym") {
+    if (this.state.config.mode === "acronym3" || this.state.config.mode === "acronym4") {
       promptWordEl.innerHTML = `
         <div class="word-box">
           <span class="word-box-text" style="--word-len: ${session.promptWord.length}; letter-spacing: 0.05em; white-space: nowrap;">${session.promptWord}</span>
@@ -594,7 +594,7 @@ const App = {
     // Update prompt label depending on mode
     const promptLabelEl = document.getElementById("results-prompt-label");
     if (promptLabelEl) {
-      if (this.state.config.mode === "acronym") {
+      if (this.state.config.mode === "acronym3" || this.state.config.mode === "acronym4") {
         promptLabelEl.innerText = "Acronym";
       } else {
         const isMulti = this.state.config.mode === "story" || this.state.config.mode === "story3";
