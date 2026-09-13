@@ -401,8 +401,8 @@ const App = {
         acronym = acronym.substring(0, replaceIdx) + forcedVowel + acronym.substring(replaceIdx + 1);
       }
       
-      // Format as A B C (no dots for cleaner look)
-      chosenWord = acronym.split('').join(' ');
+      // Format as A. B. C.
+      chosenWord = acronym.split('').join('. ') + '.';
       
       // Update practice instruction label
       if (instructionEl) {
@@ -411,7 +411,7 @@ const App = {
 
       promptWordEl.innerHTML = `
         <div class="word-box fade-in-up">
-          <span class="word-box-text" style="--word-len: ${chosenWord.length}; letter-spacing: 0.1em;">${chosenWord}</span>
+          <span class="word-box-text" style="--word-len: ${chosenWord.length}; letter-spacing: 0.05em; white-space: nowrap;">${chosenWord}</span>
         </div>
       `;
     } else if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
@@ -564,7 +564,7 @@ const App = {
     if (this.state.config.mode === "acronym") {
       promptWordEl.innerHTML = `
         <div class="word-box">
-          <span class="word-box-text" style="--word-len: ${session.promptWord.length}; letter-spacing: 0.1em;">${session.promptWord}</span>
+          <span class="word-box-text" style="--word-len: ${session.promptWord.length}; letter-spacing: 0.05em; white-space: nowrap;">${session.promptWord}</span>
         </div>
       `;
     } else if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
