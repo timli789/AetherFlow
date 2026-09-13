@@ -377,7 +377,28 @@ const App = {
     const promptWordEl = document.getElementById("prompt-word");
     const instructionEl = document.getElementById("prompt-instruction");
 
-    if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
+    if (this.state.config.mode === "acronym") {
+      // Pick 3 or 4 random letters
+      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const length = Math.random() < 0.5 ? 3 : 4;
+      let acronym = "";
+      for (let i = 0; i < length; i++) {
+        acronym += letters.charAt(Math.floor(Math.random() * letters.length));
+      }
+      // Format as A B C (no dots for cleaner look)
+      chosenWord = acronym.split('').join(' ');
+      
+      // Update practice instruction label
+      if (instructionEl) {
+        instructionEl.innerText = "Create a definition for the acronym";
+      }
+
+      promptWordEl.innerHTML = `
+        <div class="word-box fade-in-up">
+          <span class="word-box-text" style="--word-len: ${chosenWord.length}; letter-spacing: 0.1em;">${chosenWord}</span>
+        </div>
+      `;
+    } else if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
       const is3Word = this.state.config.mode === "story3";
       
       // Pick random nouns
@@ -524,7 +545,13 @@ const App = {
     
     // Inject boxed layouts for results prompts
     const promptWordEl = document.getElementById("results-prompt-word");
-    if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
+    if (this.state.config.mode === "acronym") {
+      promptWordEl.innerHTML = `
+        <div class="word-box">
+          <span class="word-box-text" style="--word-len: ${session.promptWord.length}; letter-spacing: 0.1em;">${session.promptWord}</span>
+        </div>
+      `;
+    } else if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
       const words = session.promptWord.split(" & ");
       const maxWordLen = Math.max(...words.map(w => w.length));
       
@@ -551,8 +578,12 @@ const App = {
     // Update prompt label depending on mode
     const promptLabelEl = document.getElementById("results-prompt-label");
     if (promptLabelEl) {
-      const isMulti = this.state.config.mode === "story" || this.state.config.mode === "story3";
-      promptLabelEl.innerText = isMulti ? "Prompt Nouns" : "Prompt Noun";
+      if (this.state.config.mode === "acronym") {
+        promptLabelEl.innerText = "Acronym";
+      } else {
+        const isMulti = this.state.config.mode === "story" || this.state.config.mode === "story3";
+        promptLabelEl.innerText = isMulti ? "Prompt Nouns" : "Prompt Noun";
+      }
     }
 
     // Set heading text
