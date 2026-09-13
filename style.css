@@ -67,6 +67,7 @@ button,
 .primary-btn,
 .secondary-btn,
 .duration-btn,
+.round-btn,
 .icon-button,
 .mode-tab {
   touch-action: manipulation;
@@ -79,6 +80,7 @@ button:active,
 .primary-btn:active,
 .secondary-btn:active,
 .duration-btn:active,
+.round-btn:active,
 .icon-button:active,
 .mode-tab:active {
   transform: scale(0.96);
@@ -366,7 +368,8 @@ body.light-mode .ambient-glow {
   border: 1px solid var(--glass-border);
 }
 
-.duration-btn {
+.duration-btn,
+.round-btn {
   background: transparent;
   border: none;
   color: var(--text-secondary);
@@ -382,16 +385,19 @@ body.light-mode .ambient-glow {
   justify-content: center;
 }
 
-.duration-btn:hover {
+.duration-btn:hover,
+.round-btn:hover {
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-primary);
 }
 
-body.light-mode .duration-btn:hover {
+body.light-mode .duration-btn:hover,
+body.light-mode .round-btn:hover {
   background: rgba(0, 0, 0, 0.03);
 }
 
-.duration-btn.active {
+.duration-btn.active,
+.round-btn.active {
   background: var(--bg-tertiary);
   color: var(--color-secondary);
   box-shadow: var(--inset-shadow);
