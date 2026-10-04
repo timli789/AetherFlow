@@ -1,21 +1,3 @@
-// Fallback Noun List for instant offline / slow network cold boot
-const DEFAULT_FALLBACK_NOUNS = [
-  "Accordion", "Anchor", "Apron", "Badminton", "Beach", "Blender", "Blizzard", 
-  "Cactus", "Carousel", "Chrysalis", "Coral Reef", "Daydream", "Dendrite", "Dentist", 
-  "Dinosaur", "Eclipse", "Egg", "Embers", "Eruption", "Feather", "Fingerprint", 
-  "Fire Escape", "Flashlight", "Garden Gnome", "Glacier", "Gorge", "Guitar", "Hammock", 
-  "Hibernation", "Hinge", "Houseplant", "Iceberg", "Igloo", "Iris", "Irrigation", 
-  "Javelin", "Jellyfish", "Judo", "Jukebox", "Kaleidoscope", "Kiln", "Knapsack", 
-  "Knuckle", "Lattice", "Lava", "Lighthouse", "Loom", "Magnolia", "Meadow", 
-  "Mermaid", "Meteor", "Nebula", "Necklace", "Nestling", "Nightclub", "Oasis", 
-  "Obelisk", "Olive", "Orchid", "Parachute", "Pendulum", "Platypus", "Puppet", 
-  "Quarry", "Quartz", "Quicksand", "Rafting", "Rainbow", "Riverbed", "Roulette", 
-  "Sandcastle", "Silt", "Spaceship", "Staircase", "Telescope", "Thimble", "Tornado", 
-  "Trampoline", "Umbrella", "Unicorn", "Updraft", "Urchin", "Velvet", "Viewport", 
-  "Volcano", "Vortex", "Waffle", "Wharf", "Wheat field", "Windmill", "Xeric", 
-  "Xrays", "Xylophone", "Yacht", "Yawn", "Yearbook", "Zeppelin", "Zipper", "Zither"
-];
-
 // Audio Synthesizer using Web Audio API
 const SoundEffects = {
   ctx: null,
@@ -140,9 +122,6 @@ const App = {
   init() {
     this.bindEvents();
     
-    // Always initialize with instant fallback nouns (0ms)
-    this.nounsPool = [...DEFAULT_FALLBACK_NOUNS];
-
     // Check if nouns were cached in sessionStorage
     try {
       const sessionData = sessionStorage.getItem("aetherflow_session_nouns");
@@ -217,13 +196,14 @@ const App = {
     } catch (err) {
       clearTimeout(timeoutId);
       console.warn("Background nouns synchronization failed/skipped:", err.message);
-      if (this.nounsPool.length === 0) {
-        this.nounsPool = [...DEFAULT_FALLBACK_NOUNS];
-      }
     } finally {
       this.isSyncing = false;
       this.startSessionOnSync = false;
       this.setLoadingState(false);
+      
+      if (this.nounsPool.length === 0) {
+        this.updateOnlineStatus(true);
+      }
     }
   },
 
@@ -259,8 +239,8 @@ const App = {
     this.renderIcons();
   },
 
-  updateOnlineStatus() {
-    const isOnline = navigator.onLine;
+  updateOnlineStatus(forceOffline = false) {
+    const isOnline = forceOffline ? false : navigator.onLine;
     const offlineMsg = document.getElementById("offline-message");
     const startBtn = document.querySelector(".start-btn");
     
@@ -401,7 +381,11 @@ const App = {
   // Practice Flow Management
   startPracticeSession() {
     if (this.nounsPool.length === 0) {
-      this.nounsPool = [...DEFAULT_FALLBACK_NOUNS];
+      if (this.state.config.mode === "association" || this.state.config.mode === "story" || this.state.config.mode === "story3") {
+        console.warn("Cannot start session: noun database is empty.");
+        this.updateOnlineStatus(true);
+        return;
+      }
     }
     SoundEffects.init();
     
