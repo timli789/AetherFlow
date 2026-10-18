@@ -122,18 +122,19 @@ const App = {
   init() {
     this.bindEvents();
     
-    // Check if nouns were cached in sessionStorage
+    // 1. STALE: Immediately load cached nouns from localStorage (0ms instant startup)
+    const STORAGE_KEY = "aetherflow_nouns_cache";
     try {
-      const sessionData = sessionStorage.getItem("aetherflow_session_nouns");
-      if (sessionData) {
-        const parsed = JSON.parse(sessionData);
+      const cached = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem("aetherflow_session_nouns");
+      if (cached) {
+        const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
           this.nounsPool = parsed;
-          console.log(`Loaded ${parsed.length} nouns from sessionStorage.`);
+          console.log(`[SWR Stale] Instantly loaded ${parsed.length} nouns from local storage (0ms).`);
         }
       }
     } catch (e) {
-      console.warn("Failed to read sessionStorage:", e);
+      console.warn("Failed to read local cache:", e);
     }
 
     // Set up network status tracking
@@ -143,49 +144,58 @@ const App = {
 
     this.renderIcons();
 
-    // Trigger online sync non-blocking completely in background
+    // 2. REVALIDATE: Trigger background synchronization silently to capture new database additions
     this.syncOnlineNouns();
   },
 
   async syncOnlineNouns(forceStartAfterSync = false) {
-    if (navigator.onLine === false) return;
-    
+    // If offline and we have cached nouns, keep using them without network error
+    if (navigator.onLine === false && this.nounsPool.length > 0) {
+      return;
+    }
+
+    // Generous 10-second timeout so slow cellular data connections can complete
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1500); // Fast 1.5-second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     
     this.isSyncing = true;
-    if (forceStartAfterSync) {
+    
+    // Only show loading state if the user has NO cached words or clicked "Begin Session" while waiting
+    const hasCachedNouns = this.nounsPool.length > 0;
+    if (forceStartAfterSync || !hasCachedNouns) {
       this.setLoadingState(true);
     }
     
     try {
-      // Fetch from local edge proxy to bypass cold boot database latency
       const response = await fetch('/api/nouns', {
         signal: controller.signal
       });
       clearTimeout(timeoutId);
       
-      if (!response.ok) throw new Error("Network response not ok");
+      if (!response.ok) throw new Error(`HTTP error ${response.status}`);
       
       const data = await response.json();
       if (Array.isArray(data)) {
         const words = data
           .map(row => row.word ? row.word.trim() : "")
-          .filter(w => w.length > 2 && /^[a-zA-Z]+$/.test(w)) // keep alphabetic strings
+          .filter(w => w.length > 2 && /^[a-zA-Z]+$/.test(w)) // keep alphabetic single words
           .map(w => w.charAt(0).toUpperCase() + w.slice(1));
+        
+        const uniqueWords = [...new Set(words)];
           
-        if (words.length > 0) {
-          this.nounsPool = words;
-          console.log(`Successfully synchronized ${words.length} nouns from local Edge API!`);
+        if (uniqueWords.length > 0) {
+          this.nounsPool = uniqueWords;
+          console.log(`[SWR Revalidated] Successfully refreshed ${uniqueWords.length} nouns from database!`);
           
-          // Cache in sessionStorage to speed up subsequent reloads
+          // Persist to localStorage for instant offline access and sessionStorage for backup
           try {
-            sessionStorage.setItem("aetherflow_session_nouns", JSON.stringify(words));
+            localStorage.setItem("aetherflow_nouns_cache", JSON.stringify(uniqueWords));
+            sessionStorage.setItem("aetherflow_session_nouns", JSON.stringify(uniqueWords));
           } catch (e) {
-            console.warn("Failed to save to sessionStorage:", e);
+            console.warn("Failed to save to localStorage:", e);
           }
 
-          // Automatically begin practice session if user was waiting
+          // Automatically begin practice session if user was waiting on first cold boot
           if (this.startSessionOnSync || forceStartAfterSync) {
             const durationVal = parseInt(document.getElementById("duration-input").value, 10);
             this.state.config.duration = durationVal;
@@ -201,9 +211,8 @@ const App = {
       this.startSessionOnSync = false;
       this.setLoadingState(false);
       
-      if (this.nounsPool.length === 0) {
-        this.updateOnlineStatus(true);
-      }
+      // Update UI status based on whether we actually have words available
+      this.updateOnlineStatus();
     }
   },
 
@@ -225,7 +234,8 @@ const App = {
         icon.classList.add("spin-animation");
       }
     } else {
-      if (navigator.onLine) {
+      // Re-enable if we have words in pool or we are online
+      if (this.nounsPool.length > 0 || navigator.onLine) {
         startBtn.removeAttribute("disabled");
         startBtn.style.opacity = "1";
         startBtn.style.pointerEvents = "auto";
@@ -240,25 +250,32 @@ const App = {
   },
 
   updateOnlineStatus(forceOffline = false) {
+    const hasNouns = this.nounsPool && this.nounsPool.length > 0;
     const isOnline = forceOffline ? false : navigator.onLine;
     const offlineMsg = document.getElementById("offline-message");
     const startBtn = document.querySelector(".start-btn");
     
-    if (isOnline) {
+    // If the user already has cached nouns in memory, the app is 100% playable!
+    if (hasNouns) {
       if (offlineMsg) offlineMsg.classList.add("hidden");
       
-      // If we are currently syncing, let the sync status manage the button.
-      // Otherwise, restore the active button.
-      if (!this.isSyncing) {
-        if (startBtn) {
-          startBtn.removeAttribute("disabled");
-          startBtn.style.opacity = "1";
-          startBtn.style.pointerEvents = "auto";
-        }
+      if (!this.isSyncing && startBtn) {
+        startBtn.removeAttribute("disabled");
+        startBtn.style.opacity = "1";
+        startBtn.style.pointerEvents = "auto";
       }
-      
-      // Re-fetch nouns if they aren't loaded yet
-      if (this.nounsPool.length === 0) {
+      return;
+    }
+
+    // Only if we have NO nouns at all do we block on connection status
+    if (isOnline) {
+      if (offlineMsg) offlineMsg.classList.add("hidden");
+      if (!this.isSyncing && startBtn) {
+        startBtn.removeAttribute("disabled");
+        startBtn.style.opacity = "1";
+        startBtn.style.pointerEvents = "auto";
+      }
+      if (this.nounsPool.length === 0 && !this.isSyncing) {
         this.syncOnlineNouns();
       }
     } else {
