@@ -48,6 +48,7 @@ struct AetherFlowLiteView: View {
     @State private var currentPrompt: String = ""
     @State private var timeLeft: Int = 15
     @State private var isAppLoaded: Bool = false
+    @State private var isPaused: Bool = false
     
     // Timer subscription
     @State private var timerSubscription: Timer.TimerPublisher = Timer.publish(every: 1.0, on: .main, in: .common)
@@ -226,23 +227,36 @@ struct AetherFlowLiteView: View {
             
             // Centered Timer & Word Panel
             VStack(spacing: 48) {
-                // Countdown ring
-                ZStack {
-                    Circle()
-                        .stroke(Color.white.opacity(0.04), lineWidth: 6)
-                        .frame(width: 100, height: 100)
-                    
-                    Circle()
-                        .trim(from: 0.0, to: CGFloat(timeLeft) / CGFloat(selectedDuration))
-                        .stroke(violetAccent, style: StrokeStyle(lineWidth: 6, lineCap: .round))
-                        .frame(width: 100, height: 100)
-                        .rotationEffect(.degrees(-90))
-                        .animation(.linear(duration: 1.0), value: timeLeft)
-                    
-                    Text("\(timeLeft)")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
+                // Countdown ring as interactive pause/resume button
+                Button(action: togglePause) {
+                    ZStack {
+                        Circle()
+                            .stroke(Color.white.opacity(0.04), lineWidth: 6)
+                            .frame(width: 100, height: 100)
+                        
+                        Circle()
+                            .trim(from: 0.0, to: CGFloat(timeLeft) / CGFloat(selectedDuration))
+                            .stroke(isPaused ? Color.orange : violetAccent, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                            .frame(width: 100, height: 100)
+                            .rotationEffect(.degrees(-90))
+                            .animation(.linear(duration: 1.0), value: timeLeft)
+                        
+                        VStack(spacing: 2) {
+                            Text("\(timeLeft)")
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundStyle(isPaused ? Color.orange : .white)
+                            
+                            if isPaused {
+                                Text("PAUSED")
+                                    .font(.system(size: 9, weight: .bold, design: .rounded))
+                                    .foregroundStyle(Color.orange)
+                                    .tracking(1)
+                            }
+                        }
+                    }
                 }
+                .buttonStyle(.plain)
+                .contentShape(Circle())
                 
                 // Prompt Text
                 VStack(spacing: 12) {
@@ -287,6 +301,7 @@ struct AetherFlowLiteView: View {
             .padding(.bottom, 48)
         }
         .onReceive(timerSubscription) { _ in
+            guard !isPaused else { return }
             if timeLeft > 1 {
                 timeLeft -= 1
                 if timeLeft <= 3 {
@@ -461,6 +476,9 @@ struct AetherFlowLiteView: View {
     private func startPractice() {
         triggerHaptic(style: .medium)
         
+        // Reset pause state
+        isPaused = false
+        
         // Pick first prompt noun
         currentPrompt = NounDatabase.nouns.randomElement() ?? "Silence"
         promptsPracticed = [currentPrompt]
@@ -471,6 +489,17 @@ struct AetherFlowLiteView: View {
         // Start timers
         self.timerSubscription = Timer.publish(every: 1.0, on: .main, in: .common)
         self.activeTimer = self.timerSubscription.connect()
+    }
+    
+    private func togglePause() {
+        triggerHaptic(style: .medium)
+        isPaused.toggle()
+        if isPaused {
+            stopTimer()
+        } else {
+            self.timerSubscription = Timer.publish(every: 1.0, on: .main, in: .common)
+            self.activeTimer = self.timerSubscription.connect()
+        }
     }
     
     private func nextPrompt() {
@@ -487,12 +516,14 @@ struct AetherFlowLiteView: View {
     
     private func abortPractice() {
         triggerHaptic(style: .heavy)
+        isPaused = false
         stopTimer()
         currentView = .setup
     }
     
     private func finishPractice() {
         triggerHaptic(style: .success)
+        isPaused = false
         stopTimer()
         currentView = .results
     }

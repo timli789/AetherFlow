@@ -96,6 +96,7 @@ const App = {
     },
     session: {
       active: false,
+      isPaused: false,
       promptWord: null, // The single prompt word for the session
       history: [],
       currentRound: 1,
@@ -365,6 +366,14 @@ const App = {
       this.endPracticeSession(true);
     });
 
+    // Pause / Resume Timer
+    const timerDisplayBtn = document.getElementById("timer-display-wrapper");
+    if (timerDisplayBtn) {
+      timerDisplayBtn.addEventListener("click", () => {
+        this.toggleTimerPause();
+      });
+    }
+
     // Next Practice (Restart immediately)
     document.getElementById("next-practice-btn").addEventListener("click", () => {
       if (this.state.session.currentRound >= this.state.config.rounds) {
@@ -553,19 +562,67 @@ const App = {
     this.showView("practice-view");
     this.renderIcons();
 
-    // Setup Timer
+    // Reset Timer & Pause state
+    this.state.session.isPaused = false;
+    const timerWrapper = document.getElementById("timer-display-wrapper");
+    if (timerWrapper) {
+      timerWrapper.classList.remove("paused", "pulse");
+      timerWrapper.setAttribute("title", "Click to pause countdown");
+      timerWrapper.setAttribute("aria-label", "Pause countdown");
+    }
+    const pauseBadge = document.getElementById("timer-pause-badge");
+    if (pauseBadge) pauseBadge.classList.add("hidden");
+
     this.updateTimerDisplay();
+    this.startTimerInterval();
+  },
+
+  toggleTimerPause() {
+    if (!this.state.session.active) return;
+    
+    this.state.session.isPaused = !this.state.session.isPaused;
+    SoundEffects.playTick();
+    
+    const timerWrapper = document.getElementById("timer-display-wrapper");
+    const pauseBadge = document.getElementById("timer-pause-badge");
+    
+    if (this.state.session.isPaused) {
+      clearInterval(this.timerInterval);
+      if (timerWrapper) {
+        timerWrapper.classList.add("paused");
+        timerWrapper.classList.remove("pulse");
+        timerWrapper.setAttribute("title", "Click to resume countdown");
+        timerWrapper.setAttribute("aria-label", "Resume countdown");
+      }
+      if (pauseBadge) {
+        pauseBadge.classList.remove("hidden");
+      }
+    } else {
+      if (timerWrapper) {
+        timerWrapper.classList.remove("paused");
+        timerWrapper.setAttribute("title", "Click to pause countdown");
+        timerWrapper.setAttribute("aria-label", "Pause countdown");
+      }
+      if (pauseBadge) {
+        pauseBadge.classList.add("hidden");
+      }
+      this.startTimerInterval();
+    }
+  },
+
+  startTimerInterval() {
     clearInterval(this.timerInterval);
     
-    document.getElementById("timer-display-wrapper").classList.remove("pulse");
-    
     this.timerInterval = setInterval(() => {
+      if (this.state.session.isPaused) return;
+
       this.state.session.timeLeft--;
       this.updateTimerDisplay();
       
+      const timerWrapper = document.getElementById("timer-display-wrapper");
       if (this.state.session.timeLeft <= 5 && this.state.session.timeLeft > 0) {
         SoundEffects.playTick();
-        document.getElementById("timer-display-wrapper").classList.add("pulse");
+        if (timerWrapper) timerWrapper.classList.add("pulse");
       }
       
       if (this.state.session.timeLeft <= 0) {
@@ -595,7 +652,15 @@ const App = {
 
   endPracticeSession(isAborted = false) {
     this.state.session.active = false;
+    this.state.session.isPaused = false;
     clearInterval(this.timerInterval);
+
+    const timerWrapper = document.getElementById("timer-display-wrapper");
+    if (timerWrapper) {
+      timerWrapper.classList.remove("paused", "pulse");
+    }
+    const pauseBadge = document.getElementById("timer-pause-badge");
+    if (pauseBadge) pauseBadge.classList.add("hidden");
 
     if (isAborted) {
       this.showView("dashboard-view");
