@@ -222,16 +222,18 @@ const App = {
     if (!startBtn) return;
     
     const span = startBtn.querySelector("span");
-    const icon = startBtn.querySelector("i");
+    const currentIcon = startBtn.querySelector("i, svg");
     
     if (isLoading) {
       startBtn.setAttribute("disabled", "true");
       startBtn.style.opacity = "0.7";
       startBtn.style.pointerEvents = "none";
       if (span) span.innerText = "Syncing Nouns...";
-      if (icon) {
-        icon.setAttribute("data-lucide", "loader");
-        icon.classList.add("spin-animation");
+      if (currentIcon) {
+        const loaderIcon = document.createElement("i");
+        loaderIcon.setAttribute("data-lucide", "loader");
+        loaderIcon.className = "spin-animation";
+        currentIcon.replaceWith(loaderIcon);
       }
     } else {
       // Re-enable if we have words in pool or we are online
@@ -240,9 +242,10 @@ const App = {
         startBtn.style.opacity = "1";
         startBtn.style.pointerEvents = "auto";
         if (span) span.innerText = "Begin Session";
-        if (icon) {
-          icon.setAttribute("data-lucide", "play");
-          icon.classList.remove("spin-animation");
+        if (currentIcon) {
+          const playIcon = document.createElement("i");
+          playIcon.setAttribute("data-lucide", "play");
+          currentIcon.replaceWith(playIcon);
         }
       }
     }
