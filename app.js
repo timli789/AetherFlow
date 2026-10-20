@@ -386,6 +386,17 @@ const App = {
 
     // Results Actions
     document.getElementById("retry-btn").addEventListener("click", () => {
+      // Retain the user-selected duration and number of sessions
+      const durationVal = parseInt(document.getElementById("duration-input").value, 10);
+      const roundsVal = parseInt(document.getElementById("rounds-input").value, 10);
+      if (!isNaN(durationVal)) this.state.config.duration = durationVal;
+      if (!isNaN(roundsVal)) this.state.config.rounds = roundsVal;
+
+      // Reset multi-round session series state to start fresh from Round 1
+      this.state.session.history = [];
+      this.state.session.currentRound = 1;
+      this.state.session.isPaused = false;
+
       this.startPracticeSession();
     });
 
