@@ -1352,8 +1352,9 @@ body.light-mode .mode-tab.active {
 .word-box {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--glass-border);
-  height: 72px;
-  padding: 0 36px;
+  min-height: 72px;
+  height: auto;
+  padding: 12px 32px;
   border-radius: var(--border-radius-md);
   box-shadow: var(--inset-shadow), 0 8px 32px 0 rgba(0, 0, 0, 0.2);
   display: inline-flex;
@@ -1368,7 +1369,7 @@ body.light-mode .mode-tab.active {
   font-family: var(--font-display);
   --word-len: 8;
   --max-box-size: calc(24rem / var(--word-len));
-  font-size: clamp(1.6rem, 7vw, var(--max-box-size));
+  font-size: clamp(1.4rem, 6.5vw, var(--max-box-size));
   font-weight: 800;
   letter-spacing: -0.5px;
   background: linear-gradient(135deg, #ffffff 50%, var(--text-secondary));
@@ -1377,6 +1378,7 @@ body.light-mode .mode-tab.active {
   text-align: center;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  line-height: 1.2;
 }
 
 body.light-mode .word-box {
@@ -1392,16 +1394,18 @@ body.light-mode .word-box-text {
 
 /* Results View Prompt Box Adjustments */
 .results-container .word-box {
-  height: 56px;
+  min-height: 56px;
+  height: auto;
   min-width: 180px;
   max-width: 100%;
-  padding: 0 20px;
+  padding: 10px 20px;
   box-shadow: var(--inset-shadow), 0 4px 12px rgba(0, 0, 0, 0.15);
   margin: 6px auto;
 }
 
 .results-container .word-box-text {
-  font-size: clamp(1.1rem, 4vw, calc(16rem / var(--word-len)));
+  font-size: clamp(1.05rem, 4vw, calc(16rem / var(--word-len)));
+  line-height: 1.25;
 }
 
 .results-container .prompt-double-container {

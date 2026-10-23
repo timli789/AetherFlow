@@ -21,7 +21,14 @@ struct NounDatabase {
         "Wave", "Cloud", "Crystal", "Hurricane", "Mountain", "Geyser", "Swamp", "Tundra", 
         "Dune", "Pebble", "Ivy", "Moss", "Cactus", "Galaxy", "Seed", "Root", 
         "Flame", "Frost", "Dew", "Mist", "Whirlpool", "Ridge", "Star", "Petal", 
-        "Shell", "Sprout"
+        "Shell", "Sprout",
+        // Curated 2-Word Compound Nouns for Variety
+        "Air Mattress", "Alarm Clock", "Animal Shelter", "Antique Mirror", "Arctic Fox", "Ballet Dancer", 
+        "Balloon Animal", "Barbed Wire", "Beach Umbrella", "Bell Tower", "Belt Buckle", "Bicycle Pump", 
+        "Birthday Party", "Bumper Car", "Carnival Game", "Cheese Grater", "Chocolate Cake", "Circuit Breaker", 
+        "Cloud Formation", "Crystal Ball", "Dinosaur Bone", "Ferris Wheel", "Fire Engine", "Hot Air Balloon", 
+        "Lighthouse Beam", "Meteor Shower", "Observatory Dome", "Polar Bear", "Roller Coaster", "Shooting Star", 
+        "Solar System", "Space Station", "Traffic Light", "Wind Turbine", "Coral Reef", "Sand Castle"
     ]
 }
 
@@ -267,7 +274,9 @@ struct AetherFlowLiteView: View {
                         .tracking(1.5)
                     
                     Text(currentPrompt)
-                        .font(.system(size: 46, weight: .black, design: .rounded))
+                        .font(.system(size: 44, weight: .black, design: .rounded))
+                        .minimumScaleFactor(0.65)
+                        .lineLimit(2)
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)

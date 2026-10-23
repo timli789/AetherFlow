@@ -124,9 +124,9 @@ const App = {
     this.bindEvents();
     
     // 1. STALE: Immediately load cached nouns from localStorage (0ms instant startup)
-    const STORAGE_KEY = "aetherflow_nouns_cache";
+    const STORAGE_KEY = "aetherflow_nouns_cache_v2";
     try {
-      const cached = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem("aetherflow_session_nouns");
+      const cached = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("aetherflow_nouns_cache") || sessionStorage.getItem("aetherflow_session_nouns");
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -179,17 +179,18 @@ const App = {
       if (Array.isArray(data)) {
         const words = data
           .map(row => row.word ? row.word.trim() : "")
-          .filter(w => w.length > 2 && /^[a-zA-Z]+$/.test(w)) // keep alphabetic single words
-          .map(w => w.charAt(0).toUpperCase() + w.slice(1));
+          .filter(w => w.length > 2 && /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/.test(w)) // allow single words and 2-word / multi-word nouns
+          .map(w => w.replace(/\b[a-zA-Z]/g, c => c.toUpperCase())); // Title Case each word
         
         const uniqueWords = [...new Set(words)];
           
         if (uniqueWords.length > 0) {
           this.nounsPool = uniqueWords;
-          console.log(`[SWR Revalidated] Successfully refreshed ${uniqueWords.length} nouns from database!`);
+          console.log(`[SWR Revalidated] Successfully refreshed ${uniqueWords.length} nouns from database (including multi-word nouns)!`);
           
           // Persist to localStorage for instant offline access and sessionStorage for backup
           try {
+            localStorage.setItem("aetherflow_nouns_cache_v2", JSON.stringify(uniqueWords));
             localStorage.setItem("aetherflow_nouns_cache", JSON.stringify(uniqueWords));
             sessionStorage.setItem("aetherflow_session_nouns", JSON.stringify(uniqueWords));
           } catch (e) {
