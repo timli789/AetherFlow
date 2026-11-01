@@ -385,6 +385,17 @@ const App = {
       }
     });
 
+    // Previous Practice (Go back to previous session)
+    const prevPracticeBtn = document.getElementById("prev-practice-btn");
+    if (prevPracticeBtn) {
+      prevPracticeBtn.addEventListener("click", () => {
+        if (this.state.config.rounds > 1 && this.state.session.currentRound > 1) {
+          this.state.session.currentRound--;
+          this.startPracticeSession();
+        }
+      });
+    }
+
     // Results Actions
     document.getElementById("retry-btn").addEventListener("click", () => {
       // Retain the user-selected duration and number of sessions
@@ -430,37 +441,74 @@ const App = {
     }
     SoundEffects.init();
     
-    let chosenWord = "";
+    const currentRound = this.state.session.currentRound || 1;
+    const currentHistory = this.state.session.history || [];
     const promptWordEl = document.getElementById("prompt-word");
     const instructionEl = document.getElementById("prompt-instruction");
 
+    let chosenWord = currentHistory[currentRound - 1] || "";
+
+    if (!chosenWord) {
+      if (this.state.config.mode === "acronym3" || this.state.config.mode === "acronym4") {
+        // Pick random letters using weighted English frequencies
+        const length = this.state.config.mode === "acronym4" ? 4 : 3;
+        
+        const vowels = "AAAAAEEEEEEEEIIIIIOOOOOUUUY";
+        const consonants = "BBCCCNDDDDDFFFFGGGHHHHHJKLLLLLMMMMNNNNNNPPPPQRRRRRRSSSSSSTTTTTTTTVWWXYYYZ";
+        const allLetters = vowels + consonants;
+        
+        let acronym = "";
+        let hasVowel = false;
+        
+        for (let i = 0; i < length; i++) {
+          const char = allLetters.charAt(Math.floor(Math.random() * allLetters.length));
+          acronym += char;
+          if (vowels.includes(char)) hasVowel = true;
+        }
+        
+        // Enforce at least one vowel to ensure pronounceability
+        if (!hasVowel) {
+          const replaceIdx = Math.floor(Math.random() * length);
+          const forcedVowel = vowels.charAt(Math.floor(Math.random() * vowels.length));
+          acronym = acronym.substring(0, replaceIdx) + forcedVowel + acronym.substring(replaceIdx + 1);
+        }
+        
+        // Format as A. B. C.
+        chosenWord = acronym.split('').join('. ') + '.';
+      } else if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
+        const is3Word = this.state.config.mode === "story3";
+        
+        // Pick random nouns
+        const randomIndex1 = Math.floor(Math.random() * this.nounsPool.length);
+        
+        let randomIndex2 = Math.floor(Math.random() * this.nounsPool.length);
+        while (randomIndex2 === randomIndex1 && this.nounsPool.length > 1) {
+          randomIndex2 = Math.floor(Math.random() * this.nounsPool.length);
+        }
+
+        let randomIndex3 = 0;
+        if (is3Word) {
+          randomIndex3 = Math.floor(Math.random() * this.nounsPool.length);
+          while ((randomIndex3 === randomIndex1 || randomIndex3 === randomIndex2) && this.nounsPool.length > 2) {
+            randomIndex3 = Math.floor(Math.random() * this.nounsPool.length);
+          }
+        }
+        
+        const word1 = this.nounsPool[randomIndex1];
+        const word2 = this.nounsPool[randomIndex2];
+        const word3 = is3Word ? this.nounsPool[randomIndex3] : null;
+        
+        chosenWord = is3Word ? `${word1} & ${word2} & ${word3}` : `${word1} & ${word2}`;
+      } else {
+        // Single word free association
+        const randomIndex = Math.floor(Math.random() * this.nounsPool.length);
+        chosenWord = this.nounsPool[randomIndex];
+      }
+
+      currentHistory[currentRound - 1] = chosenWord;
+    }
+
     if (this.state.config.mode === "acronym3" || this.state.config.mode === "acronym4") {
-      // Pick random letters using weighted English frequencies
-      const length = this.state.config.mode === "acronym4" ? 4 : 3;
-      
-      const vowels = "AAAAAEEEEEEEEIIIIIOOOOOUUUY";
-      const consonants = "BBCCCNDDDDDFFFFGGGHHHHHJKLLLLLMMMMNNNNNNPPPPQRRRRRRSSSSSSTTTTTTTTVWWXYYYZ";
-      const allLetters = vowels + consonants;
-      
-      let acronym = "";
-      let hasVowel = false;
-      
-      for (let i = 0; i < length; i++) {
-        const char = allLetters.charAt(Math.floor(Math.random() * allLetters.length));
-        acronym += char;
-        if (vowels.includes(char)) hasVowel = true;
-      }
-      
-      // Enforce at least one vowel to ensure pronounceability
-      if (!hasVowel) {
-        const replaceIdx = Math.floor(Math.random() * length);
-        const forcedVowel = vowels.charAt(Math.floor(Math.random() * vowels.length));
-        acronym = acronym.substring(0, replaceIdx) + forcedVowel + acronym.substring(replaceIdx + 1);
-      }
-      
-      // Format as A. B. C.
-      chosenWord = acronym.split('').join('. ') + '.';
-      
       // Update practice instruction label
       if (instructionEl) {
         instructionEl.innerText = "Create a definition for the acronym";
@@ -472,65 +520,27 @@ const App = {
         </div>
       `;
     } else if (this.state.config.mode === "story" || this.state.config.mode === "story3") {
-      const is3Word = this.state.config.mode === "story3";
-      
-      // Pick random nouns
-      const randomIndex1 = Math.floor(Math.random() * this.nounsPool.length);
-      
-      let randomIndex2 = Math.floor(Math.random() * this.nounsPool.length);
-      while (randomIndex2 === randomIndex1 && this.nounsPool.length > 1) {
-        randomIndex2 = Math.floor(Math.random() * this.nounsPool.length);
-      }
-
-      let randomIndex3 = 0;
-      if (is3Word) {
-        randomIndex3 = Math.floor(Math.random() * this.nounsPool.length);
-        while ((randomIndex3 === randomIndex1 || randomIndex3 === randomIndex2) && this.nounsPool.length > 2) {
-          randomIndex3 = Math.floor(Math.random() * this.nounsPool.length);
-        }
-      }
-      
-      const word1 = this.nounsPool[randomIndex1];
-      const word2 = this.nounsPool[randomIndex2];
-      const word3 = is3Word ? this.nounsPool[randomIndex3] : null;
-      
-      chosenWord = is3Word ? `${word1} & ${word2} & ${word3}` : `${word1} & ${word2}`;
-      
       // Update practice instruction label
       if (instructionEl) {
         instructionEl.innerText = "Create a story connecting";
       }
 
       // Render boxed words in column using the maximum length of all words to standardize font size
-      let maxWordLen = Math.max(word1.length, word2.length);
-      if (is3Word) maxWordLen = Math.max(maxWordLen, word3.length);
+      const words = chosenWord.split(" & ");
+      const maxWordLen = Math.max(...words.map(w => w.length));
 
-      let html = `
-        <div class="prompt-double-container">
-          <div class="word-box fade-in-up">
-            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word1}</span>
-          </div>
-          <div class="word-box fade-in-up" style="animation-delay: 0.12s;">
-            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word2}</span>
-          </div>
-      `;
-      
-      if (is3Word) {
+      let html = `<div class="prompt-double-container">`;
+      words.forEach((word, idx) => {
         html += `
-          <div class="word-box fade-in-up" style="animation-delay: 0.24s;">
-            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word3}</span>
+          <div class="word-box fade-in-up" style="animation-delay: ${idx * 0.12}s;">
+            <span class="word-box-text" style="--word-len: ${maxWordLen}">${word}</span>
           </div>
         `;
-      }
-      
+      });
       html += `</div>`;
       promptWordEl.innerHTML = html;
     } else {
       // Single word free association
-      const randomIndex = Math.floor(Math.random() * this.nounsPool.length);
-      chosenWord = this.nounsPool[randomIndex];
-      
-      // Update practice instruction label
       if (instructionEl) {
         instructionEl.innerText = "Associate in your mind from";
       }
@@ -543,13 +553,6 @@ const App = {
       `;
     }
 
-    // Preserve history and round from the outer scope if we are starting/advancing
-    const currentHistory = this.state.session.history || [];
-    const currentRound = this.state.session.currentRound || 1;
-    
-    // Add this word to history
-    currentHistory.push(chosenWord);
-
     // Reset Practice State
     this.state.session = {
       active: true,
@@ -561,13 +564,25 @@ const App = {
       totalDuration: this.state.config.duration
     };
 
-    // Update Round Indicator and Next Button UI
+    // Update Round Indicator, Back Button, and Next Button UI
     document.getElementById("round-indicator").innerText = `Session ${currentRound} of ${this.state.config.rounds}`;
+    
+    const prevBtn = document.getElementById("prev-practice-btn");
+    if (prevBtn) {
+      if (this.state.config.rounds > 1 && currentRound > 1) {
+        prevBtn.classList.remove("hidden");
+      } else {
+        prevBtn.classList.add("hidden");
+      }
+    }
+
     const nextBtn = document.getElementById("next-practice-btn");
-    if (currentRound >= this.state.config.rounds) {
-      nextBtn.innerHTML = `<span>Finish</span><i data-lucide="check" style="width: 16px; height: 16px;"></i>`;
-    } else {
-      nextBtn.innerHTML = `<span>Next</span><i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>`;
+    if (nextBtn) {
+      if (currentRound >= this.state.config.rounds) {
+        nextBtn.innerHTML = `<span>Finish</span><i data-lucide="check" style="width: 16px; height: 16px;"></i>`;
+      } else {
+        nextBtn.innerHTML = `<span>Next</span><i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>`;
+      }
     }
 
     // Show Practice View
@@ -684,7 +699,7 @@ const App = {
     const durationUsed = this.state.session.totalDuration;
 
     const sessionRecord = {
-      history: this.state.session.history,
+      history: (this.state.session.history || []).slice(0, this.state.config.rounds),
       duration: durationUsed
     };
 

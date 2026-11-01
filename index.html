@@ -15,7 +15,7 @@
   
   <title>AetherFlow - Free Association Practice</title>
   <!-- App Stylesheet (Synchronous in head for 0ms style paint) -->
-  <link rel="stylesheet" href="style.css?v=55">
+  <link rel="stylesheet" href="style.css?v=56">
   <!-- Local Fonts (Non-blocking so system fonts display instantly) -->
   <link rel="stylesheet" href="assets/fonts/fonts.css?v=50" media="print" onload="this.media='all'">
   <!-- Lucide Icons -->
@@ -154,6 +154,11 @@
             <div id="prompt-word" class="prompt-word" style="animation: feedWordSpawn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;">Resonance</div>
           </div>
           
+          <button id="prev-practice-btn" class="secondary-btn hidden" style="position: absolute; bottom: 20px; left: 28px; padding: 8px 16px; font-size: 0.9rem;" title="Previous Session">
+            <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+            <span>Back</span>
+          </button>
+
           <button id="next-practice-btn" class="secondary-btn" style="position: absolute; bottom: 20px; right: 28px; padding: 8px 16px; font-size: 0.9rem;" title="Next Session">
             <span>Next</span>
             <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
@@ -206,7 +211,7 @@
   </div>
 
   <!-- App Logic script -->
-  <script src="app.js?v=55"></script>
+  <script src="app.js?v=56"></script>
   <!-- Force unregister any legacy service workers and clear cache storage -->
   <script>
     if ('serviceWorker' in navigator) {
