@@ -1,32 +1,32 @@
 /* AetherFlow Design System & Stylesheet */
 
 :root {
-  /* Dark Mode Palette (Deep Forest & Bioluminescent Emerald — Stitch Design System) */
-  --bg-primary: #0A110E;
-  --bg-secondary: #111D18;
-  --bg-tertiary: #1A2C25;
-  --text-primary: #F2FBF6;
-  --text-secondary: #8FA397;
-  --text-muted: #5C7367;
-  --text-tertiary: #6B8276;
+  /* Dark Mode Palette (Pure Black & Sky Blue — Stitch Design System) */
+  --bg-primary: #000000;
+  --bg-secondary: #0B0E14;
+  --bg-tertiary: #131822;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-tertiary: #64748B;
   
-  --color-primary: #34D399;                 /* Bioluminescent Mint/Emerald */
-  --color-on-primary: #022C1E;              /* Deep Emerald On-Primary */
-  --color-primary-container: #064E3B;
-  --color-primary-glow: rgba(52, 211, 153, 0.16);
-  --color-secondary: #FBBF24;               /* Warm Sunlit Moss / Amber */
-  --color-secondary-glow: rgba(251, 191, 36, 0.16);
-  --color-accent: #10B981;                  /* Emerald Accent */
+  --color-primary: #38BDF8;                 /* Sky Blue Primary */
+  --color-on-primary: #082F49;              /* Deep Sky On-Primary */
+  --color-primary-container: #075985;
+  --color-primary-glow: rgba(56, 189, 248, 0.2);
+  --color-secondary: #7DD3FC;               /* Light Sky Secondary */
+  --color-secondary-glow: rgba(125, 211, 252, 0.2);
+  --color-accent: #0284C7;                  /* Sky 600 Accent */
   --color-warning: #F59E0B;
   --color-success: #10B981;
   --color-danger: #F43F5E;
   --color-danger-glow: rgba(244, 63, 94, 0.15);
 
-  --glass-bg: rgba(17, 29, 24, 0.65);
-  --glass-border: rgba(52, 211, 153, 0.12);
-  --glass-border-focus: rgba(52, 211, 153, 0.28);
-  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
-  --inset-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.25);
+  --glass-bg: rgba(11, 14, 20, 0.85);
+  --glass-border: rgba(30, 38, 56, 0.75);
+  --glass-border-focus: rgba(56, 189, 248, 0.4);
+  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+  --inset-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.35);
 
   --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -39,24 +39,24 @@
 
 /* Light Mode Override */
 body.light-mode {
-  --bg-primary: #F2FBF6;
+  --bg-primary: #F8FAFC;
   --bg-secondary: #FFFFFF;
-  --bg-tertiary: #D1FAE5;
-  --text-primary: #0A110E;
-  --text-secondary: #065F46;
-  --text-muted: #5C7367;
+  --bg-tertiary: #E0F2FE;
+  --text-primary: #0B0E14;
+  --text-secondary: #075985;
+  --text-muted: #64748B;
   
-  --color-primary: #059669;
+  --color-primary: #0284C7;
   --color-on-primary: #FFFFFF;
-  --color-primary-glow: rgba(5, 150, 105, 0.12);
-  --color-secondary: #D97706;
-  --color-secondary-glow: rgba(217, 119, 6, 0.12);
-  --color-accent: #10B981;
+  --color-primary-glow: rgba(2, 132, 199, 0.12);
+  --color-secondary: #0369A1;
+  --color-secondary-glow: rgba(3, 105, 161, 0.12);
+  --color-accent: #38BDF8;
 
   --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(30, 51, 43, 0.12);
-  --glass-border-focus: rgba(5, 150, 105, 0.25);
-  --card-shadow: 0 8px 32px 0 rgba(6, 78, 59, 0.08);
+  --glass-border: rgba(30, 38, 56, 0.12);
+  --glass-border-focus: rgba(2, 132, 199, 0.25);
+  --card-shadow: 0 8px 32px 0 rgba(8, 47, 73, 0.08);
   --inset-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 }
 
@@ -476,7 +476,7 @@ body.light-mode .round-btn:hover {
 
 /* Buttons */
 .primary-btn {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  background: var(--color-primary);
   color: var(--color-on-primary);
   border: none;
   font-family: var(--font-display);
@@ -490,12 +490,12 @@ body.light-mode .round-btn:hover {
   justify-content: center;
   gap: 10px;
   transition: var(--transition-smooth);
-  box-shadow: 0 4px 15px rgba(52, 211, 153, 0.25);
+  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
 }
 
 .primary-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(52, 211, 153, 0.4);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
   filter: brightness(1.05);
 }
 
@@ -724,7 +724,7 @@ body.light-mode .round-btn:hover {
 
 .timer-display:hover {
   transform: scale(1.06);
-  filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.45));
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.45));
 }
 
 .timer-display:active {
@@ -770,8 +770,8 @@ body.light-mode .round-btn:hover {
 .timer-pause-badge {
   position: absolute;
   bottom: -6px;
-  background: rgba(10, 17, 14, 0.95);
-  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: rgba(11, 14, 20, 0.95);
+  border: 1px solid rgba(56, 189, 248, 0.4);
   border-radius: 10px;
   padding: 2px 7px;
   font-size: 0.6rem;
@@ -1054,7 +1054,7 @@ kbd {
   gap: 6px;
   background: var(--color-primary-glow);
   color: var(--color-primary);
-  border: 1px solid rgba(52, 211, 153, 0.25);
+  border: 1px solid rgba(56, 189, 248, 0.25);
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.75rem;
