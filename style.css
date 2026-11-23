@@ -1,32 +1,37 @@
 /* AetherFlow Design System & Stylesheet */
 
 :root {
-  /* Dark Mode Palette (Pure Black & Sky Blue — Stitch Design System) */
-  --bg-primary: #000000;
-  --bg-secondary: #0B0E14;
-  --bg-tertiary: #131822;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --text-tertiary: #64748B;
+  /* Dark Mode Palette — Deep Cosmos & Nebula Starlight */
+  --bg-primary: #04050d;                    /* Void Black / Deep Space */
+  --bg-secondary: #0a0d1f;                  /* Deep Stellar Navy */
+  --bg-tertiary: #131735;                   /* Cosmic Dust Indigo */
+  --text-primary: #f0f4ff;                  /* Starlight White */
+  --text-secondary: #9da8d4;                /* Stellar Haze */
+  --text-muted: #626c99;                    /* Interstellar Grey */
+  --text-tertiary: #626c99;
   
-  --color-primary: #38BDF8;                 /* Sky Blue Primary */
-  --color-on-primary: #082F49;              /* Deep Sky On-Primary */
-  --color-primary-container: #075985;
-  --color-primary-glow: rgba(56, 189, 248, 0.2);
-  --color-secondary: #7DD3FC;               /* Light Sky Secondary */
-  --color-secondary-glow: rgba(125, 211, 252, 0.2);
-  --color-accent: #0284C7;                  /* Sky 600 Accent */
-  --color-warning: #F59E0B;
-  --color-success: #10B981;
-  --color-danger: #F43F5E;
-  --color-danger-glow: rgba(244, 63, 94, 0.15);
+  --color-primary: #8b5cf6;                 /* Nebula Violet (Star Nursery) */
+  --color-on-primary: #ffffff;
+  --color-primary-container: #4c1d95;
+  --color-primary-glow: rgba(139, 92, 246, 0.25);
+  
+  --color-secondary: #06b6d4;               /* Pulsar Cyan */
+  --color-secondary-glow: rgba(6, 182, 212, 0.22);
+  
+  --color-accent: #f43f5e;                  /* Supernova Pink/Magenta */
+  --color-accent-glow: rgba(244, 63, 94, 0.22);
+  
+  --color-star-gold: #fbbf24;               /* Golden Star Glow */
+  --color-warning: #f59e0b;
+  --color-success: #10b981;
+  --color-danger: #f43f5e;
+  --color-danger-glow: rgba(244, 63, 94, 0.2);
 
-  --glass-bg: rgba(11, 14, 20, 0.85);
-  --glass-border: rgba(30, 38, 56, 0.75);
-  --glass-border-focus: rgba(56, 189, 248, 0.4);
-  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
-  --inset-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.35);
+  --glass-bg: rgba(10, 13, 31, 0.72);
+  --glass-border: rgba(139, 92, 246, 0.16);
+  --glass-border-focus: rgba(6, 182, 212, 0.4);
+  --card-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.65), 0 0 20px 0 rgba(139, 92, 246, 0.08);
+  --inset-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4);
 
   --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -37,26 +42,26 @@
   --transition-fast: all 0.15s ease;
 }
 
-/* Light Mode Override */
+/* Light Mode Override — Celestial Dawn */
 body.light-mode {
-  --bg-primary: #F8FAFC;
-  --bg-secondary: #FFFFFF;
-  --bg-tertiary: #E0F2FE;
-  --text-primary: #0B0E14;
-  --text-secondary: #075985;
-  --text-muted: #64748B;
+  --bg-primary: #f4f6fc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #ede9fe;
+  --text-primary: #0a0d1f;
+  --text-secondary: #4c1d95;
+  --text-muted: #6b7280;
   
-  --color-primary: #0284C7;
-  --color-on-primary: #FFFFFF;
-  --color-primary-glow: rgba(2, 132, 199, 0.12);
-  --color-secondary: #0369A1;
-  --color-secondary-glow: rgba(3, 105, 161, 0.12);
-  --color-accent: #38BDF8;
+  --color-primary: #7c3aed;
+  --color-on-primary: #ffffff;
+  --color-primary-glow: rgba(124, 58, 237, 0.15);
+  --color-secondary: #0891b2;
+  --color-secondary-glow: rgba(8, 145, 178, 0.15);
+  --color-accent: #e11d48;
 
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(30, 38, 56, 0.12);
-  --glass-border-focus: rgba(2, 132, 199, 0.25);
-  --card-shadow: 0 8px 32px 0 rgba(8, 47, 73, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(124, 58, 237, 0.14);
+  --glass-border-focus: rgba(8, 145, 178, 0.35);
+  --card-shadow: 0 12px 36px 0 rgba(15, 23, 42, 0.08);
   --inset-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 }
 
@@ -102,38 +107,38 @@ body {
   transition: background-color 0.5s ease;
 }
 
-/* Background Ambient Glows */
+/* Background Ambient Glows — Cosmic Nebula */
 .ambient-glow {
   position: fixed;
   border-radius: 50%;
-  filter: blur(120px);
+  filter: blur(140px);
   z-index: 0;
   pointer-events: none;
-  opacity: 0.45;
+  opacity: 0.5;
   transition: all 0.5s ease;
 }
 .glow-1 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
-  top: -100px;
-  left: -100px;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.45) 0%, rgba(99, 102, 241, 0.2) 40%, transparent 70%);
+  top: -120px;
+  left: -120px;
 }
 .glow-2 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, var(--color-secondary) 0%, transparent 70%);
-  bottom: -150px;
-  right: -100px;
+  width: 580px;
+  height: 580px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.35) 0%, rgba(59, 130, 246, 0.18) 45%, transparent 70%);
+  bottom: -160px;
+  right: -120px;
 }
 .glow-3 {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
-  top: 40%;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.28) 0%, rgba(168, 85, 247, 0.12) 50%, transparent 70%);
+  top: 35%;
   left: 50%;
   transform: translate(-50%, -50%);
-  opacity: 0.15;
+  opacity: 0.22;
 }
 
 body.light-mode .ambient-glow {
@@ -171,18 +176,18 @@ body.light-mode .ambient-glow {
 }
 
 .brand-logo {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #06b6d4 100%);
   width: 42px;
   height: 42px;
   border-radius: var(--border-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 15px var(--color-primary-glow);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.45);
 }
 
 .logo-icon {
-  stroke: var(--color-on-primary);
+  stroke: #ffffff;
   width: 24px;
   height: 24px;
 }
@@ -476,8 +481,8 @@ body.light-mode .round-btn:hover {
 
 /* Buttons */
 .primary-btn {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #06b6d4 100%);
+  color: #ffffff;
   border: none;
   font-family: var(--font-display);
   font-size: 1rem;
@@ -490,13 +495,13 @@ body.light-mode .round-btn:hover {
   justify-content: center;
   gap: 10px;
   transition: var(--transition-smooth);
-  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4), 0 0 12px rgba(6, 182, 212, 0.25);
 }
 
 .primary-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
-  filter: brightness(1.05);
+  box-shadow: 0 6px 26px rgba(139, 92, 246, 0.55), 0 0 16px rgba(6, 182, 212, 0.35);
+  filter: brightness(1.1);
 }
 
 .primary-btn:active {
@@ -724,7 +729,7 @@ body.light-mode .round-btn:hover {
 
 .timer-display:hover {
   transform: scale(1.06);
-  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.45));
+  filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.55));
 }
 
 .timer-display:active {
@@ -770,16 +775,16 @@ body.light-mode .round-btn:hover {
 .timer-pause-badge {
   position: absolute;
   bottom: -6px;
-  background: rgba(11, 14, 20, 0.95);
-  border: 1px solid rgba(56, 189, 248, 0.4);
+  background: rgba(10, 13, 31, 0.95);
+  border: 1px solid rgba(251, 191, 36, 0.5);
   border-radius: 10px;
   padding: 2px 7px;
   font-size: 0.6rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--color-secondary);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  color: #fbbf24;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6), 0 0 8px rgba(251, 191, 36, 0.3);
   pointer-events: none;
   animation: fadeInBadge 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -1053,14 +1058,15 @@ kbd {
   align-items: center;
   gap: 6px;
   background: var(--color-primary-glow);
-  color: var(--color-primary);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #c084fc;
+  border: 1px solid rgba(139, 92, 246, 0.35);
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
   margin-bottom: 16px;
   text-transform: uppercase;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
 }
 
 .results-badge i {
