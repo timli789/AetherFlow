@@ -17,7 +17,7 @@ const server = http.createServer(async (req, res) => {
   
   const cleanUrl = req.url.split('?')[0];
 
-  // Route: /api/nouns (Proxy to Supabase with full Range pagination & reviewed tracking)
+  // Route: /api/nouns (Proxy to Supabase with full Range pagination)
   if (cleanUrl === '/api/nouns') {
     const SUPABASE_URL = 'https://diryaljjfcucuvzyelvk.supabase.co/rest/v1/nouns';
     const headers = {
@@ -25,72 +25,11 @@ const server = http.createServer(async (req, res) => {
       'Authorization': 'Bearer sb_publishable_puw8xu-OwPWKAtVgaWpiTg_CjOO93lF'
     };
 
-    if (req.method === 'POST' || req.method === 'PATCH') {
-      let rawBody = '';
-      req.on('data', chunk => { rawBody += chunk.toString(); });
-      req.on('end', async () => {
-        try {
-          const parsed = rawBody ? JSON.parse(rawBody) : {};
-          const rawWords = Array.isArray(parsed.words) ? parsed.words : (parsed.word ? [parsed.word] : []);
-          const cleaned = rawWords.map(w => String(w || '').trim()).filter(Boolean);
-
-          if (cleaned.length === 0) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'No words provided to mark as reviewed.' }));
-            return;
-          }
-
-          const normalizedVals = [...new Set(cleaned.map(w => w.toLowerCase()))]
-            .map(w => `"${w.replace(/"/g, '\\"')}"`)
-            .join(',');
-          const exactVals = [...new Set([...cleaned, ...cleaned.map(w => w.toLowerCase())])]
-            .map(w => `"${w.replace(/"/g, '\\"')}"`)
-            .join(',');
-
-          const filterQuery = `or=(normalized.in.(${normalizedVals}),word.in.(${exactVals}))`;
-          const patchRes = await fetch(`${SUPABASE_URL}?${filterQuery}`, {
-            method: 'PATCH',
-            headers: {
-              ...headers,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
-            },
-            body: JSON.stringify({ reviewed: true })
-          });
-
-          if (!patchRes.ok) {
-            const errText = await patchRes.text();
-            throw new Error(`Supabase PATCH failed (${patchRes.status}): ${errText}`);
-          }
-
-          const updated = await patchRes.json();
-          res.writeHead(200, {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-store',
-            'Access-Control-Allow-Origin': '*'
-          });
-          res.end(JSON.stringify({ updatedCount: Array.isArray(updated) ? updated.length : 0 }));
-        } catch (err) {
-          console.error("Local POST /api/nouns handler error:", err);
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: err.message }));
-        }
-      });
-      return;
-    }
-
     try {
-      let queryUrl = `${SUPABASE_URL}?select=word,reviewed&or=(reviewed.is.null,reviewed.eq.false)`;
-      let initialResponse = await fetch(queryUrl, {
+      const queryUrl = `${SUPABASE_URL}?select=word`;
+      const initialResponse = await fetch(queryUrl, {
         headers: { ...headers, 'Range': '0-999', 'Prefer': 'count=exact' }
       });
-
-      if (!initialResponse.ok && initialResponse.status === 400) {
-        queryUrl = `${SUPABASE_URL}?select=word`;
-        initialResponse = await fetch(queryUrl, {
-          headers: { ...headers, 'Range': '0-999', 'Prefer': 'count=exact' }
-        });
-      }
 
       if (!initialResponse.ok) {
         throw new Error(`Supabase REST query responded with status ${initialResponse.status}`);
@@ -125,7 +64,7 @@ const server = http.createServer(async (req, res) => {
 
       res.writeHead(200, {
         'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Cache-Control': 's-maxage=86400, stale-while-revalidate=3600, public',
         'Access-Control-Allow-Origin': '*'
       });
       res.end(JSON.stringify(allWords));

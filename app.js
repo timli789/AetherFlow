@@ -107,8 +107,6 @@ const App = {
   },
 
   nounsPool: [],
-  reviewedNouns: new Set(),
-  pendingReviewWords: new Set(),
   isSyncing: false,
   startSessionOnSync: false,
 
@@ -127,22 +125,13 @@ const App = {
     
     // 1. STALE: Immediately load cached nouns from localStorage (0ms instant startup)
     const STORAGE_KEY = "aetherflow_nouns_cache_v2";
-    const REVIEWED_KEY = "aetherflow_reviewed_nouns";
     try {
-      const savedReviewed = localStorage.getItem(REVIEWED_KEY);
-      if (savedReviewed) {
-        const parsedReviewed = JSON.parse(savedReviewed);
-        if (Array.isArray(parsedReviewed)) {
-          this.reviewedNouns = new Set(parsedReviewed.map(w => String(w).toLowerCase()));
-        }
-      }
-
       const cached = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("aetherflow_nouns_cache") || sessionStorage.getItem("aetherflow_session_nouns");
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          this.nounsPool = parsed.filter(w => !this.reviewedNouns.has(String(w).toLowerCase()));
-          console.log(`[SWR Stale] Instantly loaded ${this.nounsPool.length} unreviewed nouns from local storage (0ms).`);
+          this.nounsPool = parsed;
+          console.log(`[SWR Stale] Instantly loaded ${this.nounsPool.length} nouns from local storage (0ms).`);
         }
       }
     } catch (e) {
@@ -158,47 +147,6 @@ const App = {
 
     // 2. REVALIDATE: Trigger background synchronization silently to capture new database additions
     this.syncOnlineNouns();
-  },
-
-  markNounsAsReviewed(wordsArray) {
-    if (!Array.isArray(wordsArray) || wordsArray.length === 0) return;
-
-    const cleanWords = wordsArray.map(w => String(w || "").trim()).filter(Boolean);
-    if (cleanWords.length === 0) return;
-
-    const lowerSet = new Set(cleanWords.map(w => w.toLowerCase()));
-    lowerSet.forEach(w => {
-      this.reviewedNouns.add(w);
-      this.pendingReviewWords.add(w);
-    });
-
-    // Immediately remove from in-memory pool so they cannot be picked again
-    this.nounsPool = this.nounsPool.filter(w => !lowerSet.has(String(w).toLowerCase()));
-
-    // Persist updated pool and local reviewed backup
-    try {
-      localStorage.setItem("aetherflow_reviewed_nouns", JSON.stringify([...this.reviewedNouns]));
-      localStorage.setItem("aetherflow_nouns_cache_v2", JSON.stringify(this.nounsPool));
-      localStorage.setItem("aetherflow_nouns_cache", JSON.stringify(this.nounsPool));
-      sessionStorage.setItem("aetherflow_session_nouns", JSON.stringify(this.nounsPool));
-    } catch (e) {
-      console.warn("Failed to persist reviewed nouns locally:", e);
-    }
-
-    // Update Supabase database asynchronously
-    fetch('/api/nouns', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ words: cleanWords })
-    })
-      .then(res => {
-        if (res.ok) {
-          lowerSet.forEach(w => this.pendingReviewWords.delete(w));
-        }
-      })
-      .catch(err => {
-        console.warn("Failed to mark nouns as reviewed in database:", err.message);
-      });
   },
 
   async syncOnlineNouns(forceStartAfterSync = false) {
@@ -221,8 +169,7 @@ const App = {
     
     try {
       const response = await fetch('/api/nouns', {
-        signal: controller.signal,
-        cache: 'no-store'
+        signal: controller.signal
       });
       clearTimeout(timeoutId);
       
@@ -230,23 +177,35 @@ const App = {
       
       const data = await response.json();
       if (Array.isArray(data)) {
-        const hasDbReviewedColumn = data.length > 0 && Object.prototype.hasOwnProperty.call(data[0], 'reviewed');
-
         const words = data
-          .filter(row => row && row.reviewed !== true)
           .map(row => row.word ? row.word.trim() : "")
           .filter(w => w.length > 2 && /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/.test(w)) // allow single words and 2-word / multi-word nouns
-          .filter(w => {
-            const lower = w.toLowerCase();
-            // If DB already has the `reviewed` column, only exclude in-flight pending updates;
-            // otherwise fall back to the local reviewedNouns set.
-            return hasDbReviewedColumn
-              ? !this.pendingReviewWords.has(lower)
-              : !this.reviewedNouns.has(lower);
-          })
           .map(w => w.replace(/\b[a-zA-Z]/g, c => c.toUpperCase())); // Title Case each word
         
         const uniqueWords = [...new Set(words)];
+          
+        if (uniqueWords.length > 0) {
+          this.nounsPool = uniqueWords;
+          console.log(`[SWR Revalidated] Successfully refreshed ${uniqueWords.length} nouns from database!`);
+          
+          // Persist to localStorage for instant offline access and sessionStorage for backup
+          try {
+            localStorage.setItem("aetherflow_nouns_cache_v2", JSON.stringify(uniqueWords));
+            localStorage.setItem("aetherflow_nouns_cache", JSON.stringify(uniqueWords));
+            sessionStorage.setItem("aetherflow_session_nouns", JSON.stringify(uniqueWords));
+          } catch (e) {
+            console.warn("Failed to save to localStorage:", e);
+          }
+
+          // Automatically begin practice session if user was waiting on first cold boot
+          if (uniqueWords.length > 0 && (this.startSessionOnSync || forceStartAfterSync)) {
+            const durationVal = parseInt(document.getElementById("duration-input").value, 10);
+            this.state.config.duration = durationVal;
+            this.startPracticeSession();
+          }
+        }
+      }
+    } catch (err) {
           
         this.nounsPool = uniqueWords;
         console.log(`[SWR Revalidated] Successfully refreshed ${uniqueWords.length} unreviewed nouns from database!`);
@@ -561,12 +520,10 @@ const App = {
         const word3 = is3Word ? this.nounsPool[randomIndex3] : null;
         
         chosenWord = is3Word ? `${word1} & ${word2} & ${word3}` : `${word1} & ${word2}`;
-        this.markNounsAsReviewed(is3Word ? [word1, word2, word3] : [word1, word2]);
       } else {
         // Single word free association
         const randomIndex = Math.floor(Math.random() * this.nounsPool.length);
         chosenWord = this.nounsPool[randomIndex];
-        this.markNounsAsReviewed([chosenWord]);
       }
 
       currentHistory[currentRound - 1] = chosenWord;
