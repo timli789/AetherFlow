@@ -206,27 +206,6 @@ const App = {
         }
       }
     } catch (err) {
-          
-        this.nounsPool = uniqueWords;
-        console.log(`[SWR Revalidated] Successfully refreshed ${uniqueWords.length} unreviewed nouns from database!`);
-        
-        // Persist to localStorage for instant offline access and sessionStorage for backup
-        try {
-          localStorage.setItem("aetherflow_nouns_cache_v2", JSON.stringify(uniqueWords));
-          localStorage.setItem("aetherflow_nouns_cache", JSON.stringify(uniqueWords));
-          sessionStorage.setItem("aetherflow_session_nouns", JSON.stringify(uniqueWords));
-        } catch (e) {
-          console.warn("Failed to save to localStorage:", e);
-        }
-
-        // Automatically begin practice session if user was waiting on first cold boot
-        if (uniqueWords.length > 0 && (this.startSessionOnSync || forceStartAfterSync)) {
-          const durationVal = parseInt(document.getElementById("duration-input").value, 10);
-          this.state.config.duration = durationVal;
-          this.startPracticeSession();
-        }
-      }
-    } catch (err) {
       clearTimeout(timeoutId);
       console.warn("Background nouns synchronization failed/skipped:", err.message);
     } finally {
