@@ -184,12 +184,14 @@ body.light-mode .ambient-glow {
   align-items: center;
   justify-content: center;
   box-shadow: 0 0 20px rgba(139, 92, 246, 0.45);
+  flex-shrink: 0;
 }
 
 .logo-icon {
   stroke: #ffffff;
   width: 24px;
   height: 24px;
+  display: block;
 }
 
 .brand-text h1 {
