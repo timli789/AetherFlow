@@ -1318,7 +1318,8 @@ kbd {
   transition: var(--transition-smooth);
 }
 
-.mode-tab i {
+.mode-tab i,
+.mode-tab svg {
   width: 20px;
   height: 20px;
   transition: var(--transition-smooth);
@@ -1342,7 +1343,8 @@ kbd {
   box-shadow: var(--inset-shadow);
 }
 
-.mode-tab.active i {
+.mode-tab.active i,
+.mode-tab.active svg {
   color: var(--color-primary);
   transform: scale(1.1);
 }
